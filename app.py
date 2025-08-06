@@ -14,7 +14,7 @@ load_dotenv()
 # Access OpenAI API key from Streamlit secrets
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 client = OpenAI(api_key=OPENAI_API_KEY)
-# test
+# 
 
 st.set_page_config(page_title="Competition Team App", page_icon="🤖", layout="wide")
 
@@ -111,7 +111,7 @@ Please provide a comprehensive business analysis response based on the case stud
 """
         
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a senior M&A consultant providing expert analysis. Use the case study context to inform your response and provide detailed, actionable business insights."},
                 {"role": "user", "content": full_context}

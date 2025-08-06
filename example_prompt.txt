@@ -1,0 +1,40 @@
+You are a senior strategy consultant advising TechCorp, a mid-sized fintech company focused on digital payment solutions for SMEs, with consistent growth over the past 3 years. TechCorp is considering acquiring PayFlow Solutions, a company with $45M annual revenue growing at 25% YoY, 180 employees, and a flagship AI-powered invoice management platform. PayFlow is currently the #3 player in SME invoice automation.
+
+Create a detailed business case for this acquisition covering the following areas:
+
+1. Strategic Fit Analysis
+How does PayFlow's product complement TechCorp’s current offerings?
+
+What strategic synergies (product, technology, customer base, distribution, R&D) could be leveraged?
+
+Could the combined offering create a competitive moat or unique value proposition?
+
+2. Financial Evaluation
+Estimate a reasonable valuation range for PayFlow using revenue multiples or discounted cash flow, factoring in its 25% annual growth rate.
+
+Highlight financial risks (e.g., customer concentration, burn rate, scalability issues) and opportunities (e.g., cross-sell, upsell, recurring revenue growth).
+
+Estimate ROI timeline based on different integration scenarios.
+
+3. Integration Planning
+Identify the main technical integration hurdles (e.g., API compatibility, data migration, platform consolidation).
+
+Propose a roadmap for cultural and organizational integration (team alignment, retention of key talent, internal communications).
+
+Outline a Day 1 to Day 100 plan post-acquisition.
+
+4. Market Impact
+Analyze how this acquisition strengthens TechCorp’s competitive position in the SME fintech space.
+
+Identify new customer segments, geographic markets, or upsell paths opened by the acquisition.
+
+Estimate potential market share gain within 12–24 months.
+
+5. Risk Assessment & Mitigation
+List the top 3 acquisition risks (e.g., cultural mismatch, tech redundancy, overvaluation).
+
+Provide mitigation strategies for each.
+
+Address fintech-specific regulatory challenges (e.g., data privacy, financial compliance), and propose a plan to navigate them post-acquisition.
+
+Deliver the business case in a structured report format with headings, bullet points where appropriate, and strategic recommendations backed by data or assumptions. Focus on clarity, depth, and actionable insights suitable for executive stakeholders.
