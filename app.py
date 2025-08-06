@@ -14,7 +14,7 @@ load_dotenv()
 # Access OpenAI API key from Streamlit secrets
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 client = OpenAI(api_key=OPENAI_API_KEY)
-
+# test
 
 st.set_page_config(page_title="Competition Team App", page_icon="🤖", layout="wide")
 
