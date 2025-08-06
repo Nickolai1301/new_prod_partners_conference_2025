@@ -10,7 +10,7 @@ import pandas as pd
 
 # Load environment variables
 load_dotenv()
-OPENAI_API_KEY=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
+OPENAI_API_KEY="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"
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
