@@ -172,7 +172,7 @@ CONTEXT:
 Generate a single Trump-style tweet (max 280 characters) that:
 1. Comments on their score and performance 
 2. Uses Trump's signature style (ALL CAPS for emphasis, exclamation points, superlatives)
-3. Is CONGRATULATORY if score ≥ 90, or *EXTREMELY CRITICAL* if score < 90
+3. Is CONGRATULATORY if score ≥ 95, or *EXTREMELY CRITICAL* if score < 95
 4. Keep it business/competition focused
 5. Make it authentic to Trump's tweeting style
 
