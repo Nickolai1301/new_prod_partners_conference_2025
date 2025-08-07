@@ -32,12 +32,8 @@ class PromptEvaluator:
     
     def __init__(self, model: str = "gpt-4"):
         self.model = model
-        self.evaluation_criteria = {
-            "clarity": "How clear and understandable is the prompt?",
-            "specificity": "How specific and detailed are the requirements?",
-            "context": "How well does the prompt provide necessary context?",
-            "structure": "How well-structured and organized is the prompt?"
-        }
+        # Load evaluation criteria from rubric.txt
+        self.evaluation_criteria = self._load_rubric()
         self.feedback_tone = self._load_feedback_tone()
     
     def _load_feedback_tone(self) -> str:
@@ -50,29 +46,48 @@ class PromptEvaluator:
             return """Be encouraging and positive while providing constructive feedback. 
                      Focus on strengths and frame improvements as opportunities for growth."""
     
+    def _load_rubric(self) -> dict[str, str]:
+        """Load evaluation criteria from rubric.txt file"""
+        rubric: dict[str, str] = {}
+        try:
+            with open("rubric.txt", "r", encoding="utf-8") as file:
+                for line in file:
+                    if ":" in line:
+                        key, val = line.strip().split(":", 1)
+                        rubric[key.strip()] = val.strip()
+        except FileNotFoundError:
+            # Fallback to default criteria if rubric.txt is missing
+            rubric = {
+                "clarity": "How clear and understandable is the prompt?",
+                "specificity": "How specific and detailed are the requirements?",
+                "context": "How well does the prompt provide necessary context?",
+                "structure": "How well-structured and organized is the prompt?"
+            }
+        return rubric
+    
     def create_evaluation_prompt(self, user_prompt: str, industry: str = None) -> str:
-        """Create a system prompt for evaluating user prompts"""
+        """Create a system prompt for evaluating AI-generated outputs in a savage Trump style"""
         
         evaluation_prompt = f"""
 {self.feedback_tone}
 
-You are an expert prompt engineer and business consultant evaluating prompts for M&A and business strategy analysis. Use the cheerful, encouraging tone described above in all your feedback.
+You are a savage Trump-style prompt evaluator, ruthlessly insulting mediocrity and sparing praise only when absolutely deserved.
 
-Please evaluate the following user prompt based on these criteria:
+Please evaluate the following AI-generated output based on these criteria:
 
-1. **Clarity (25%)**: How clear and understandable is the prompt? Is it easy to follow?
-2. **Specificity (25%)**: How specific and detailed are the requirements? Does it ask for concrete deliverables?
-3. **Context (25%)**: How well does the prompt provide necessary background and context for analysis?
-4. **Structure (25%)**: How well-organized is the prompt? Does it follow a logical flow?
+1. **Clarity (25%)**: How clear and understandable is the output? Is it easy to follow?
+2. **Specificity (25%)**: How specific and detailed are the provided answers? Does it address concrete deliverables?
+3. **Context (25%)**: How well does the output provide necessary context for analysis?
+4. **Structure (25%)**: How well-organized is the output? Does it follow a logical flow?
 
-USER PROMPT TO EVALUATE:
+AI OUTPUT TO EVALUATE:
 ```
 {user_prompt}
 ```
 
 {f"INDUSTRY CONTEXT: {industry}" if industry else ""}
 
-Please provide your evaluation in the following JSON format, using the enthusiastic and encouraging tone throughout:
+Please provide your evaluation in the following JSON format, using the savage Trump style throughout (do not give high scores easily; most outputs should earn low scores):
 {{
     "overall_score": <float 0-100>,
     "clarity_score": <float 0-100>,
@@ -84,7 +99,7 @@ Please provide your evaluation in the following JSON format, using the enthusias
     "improvements": ["<encouraging improvement 1>", "<encouraging improvement 2>", "<encouraging improvement 3>"]
 }}
 
-Remember: Frame all feedback positively and encouragingly! Focus on business consulting and M&A context while maintaining an upbeat, supportive tone that makes the user excited to improve their prompting skills.
+Remember: Humiliate laziness, demand excellence, and spare no insults. Praise only if it’s truly exceptional."
 """
         return evaluation_prompt
     

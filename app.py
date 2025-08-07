@@ -247,11 +247,11 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                 if terminal_output.strip():
                     st.session_state["terminal_output"].append(f"[AI Generation] {terminal_output.strip()}")
             
-            # Step 2: Evaluate the original user prompt (not the AI response)
-            with st.spinner("📊 Evaluating your prompt quality..."):
+            # Step 2: Evaluate the AI-generated response
+            with st.spinner("📊 Evaluating AI response quality..."):
                 with capture_terminal_output() as (stdout_capture, stderr_capture):
                     evaluation = st.session_state["evaluator"].evaluate_prompt(
-                        user_prompt, 
+                        ai_response,
                         st.session_state["team"]
                     )
                 
@@ -286,8 +286,8 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     st.error(f"⚠️ {ai_response}")
             
             with col2:
-                st.markdown("### 📊 Prompt Evaluation")
-                st.markdown("*Quality assessment of your original prompt:*")
+                st.markdown("### 📊 AI Response Evaluation")
+                st.markdown("*Quality assessment of the AI-generated response:*")
                 
                 if evaluation:
                     # Overall score with color coding
@@ -305,7 +305,7 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     # Individual scores
                     st.markdown("**📋 Detailed Scores:**")
                     score_data = {
-                        "Criterion": ["Clarity", "Specificity", "Context", "Structure"],
+                        "Criterion": ["Strategic Fit & Objectives", "Audience & Relationships", "Commercials & Resourcing", "Outcomes, Measurment & Activation"],
                         "Score": [f"{evaluation.clarity_score:.1f}", f"{evaluation.specificity_score:.1f}", 
                                 f"{evaluation.context_score:.1f}", f"{evaluation.structure_score:.1f}"]
                     }
@@ -316,31 +316,11 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     st.markdown("**💭 AI Feedback:**")
                     st.info(evaluation.feedback)
                     
-                    # Strengths and improvements in expandable sections
-                    with st.expander("✅ Strengths"):
-                        for strength in evaluation.strengths:
-                            st.write(f"• {strength}")
-                    
-                    with st.expander("🔧 Areas for Improvement"):
-                        for improvement in evaluation.improvements:
-                            st.write(f"• {improvement}")
+                    # ...removed strengths and areas for improvement boxes...
                 else:
                     st.error("⚠️ Evaluation failed. Please try again.")
             
-            # Show original prompt for reference
-            st.markdown("---")
-            st.markdown("### 📝 Your Original Prompt")
-            with st.expander("Show submitted prompt", expanded=False):
-                st.code(user_prompt, language="text")
-            
-            # Terminal Output Section
-            st.markdown("### 🖥️ System Activity")
-            if st.session_state["terminal_output"]:
-                with st.expander("Show System Logs", expanded=False):
-                    for i, output in enumerate(reversed(st.session_state["terminal_output"][-5:]), 1):  # Show last 5 entries
-                        st.code(output, language="text")
-            else:
-                st.info("No system activity captured yet.")
+            # ...removed System Activity and Your Original Prompt sections...
     elif submit_disabled:
         st.warning("No more submissions available.")
     else:
