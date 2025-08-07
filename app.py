@@ -507,14 +507,6 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
             with st.expander("Show submitted prompt", expanded=False):
                 st.code(user_prompt, language="text")
             
-            # Terminal Output Section
-            st.markdown("### 🖥️ System Activity")
-            if st.session_state["terminal_output"]:
-                with st.expander("Show System Logs", expanded=False):
-                    for i, output in enumerate(reversed(st.session_state["terminal_output"][-5:]), 1):  # Show last 5 entries
-                        st.code(output, language="text")
-            else:
-                st.info("No system activity captured yet.")
     elif submit_disabled:
         st.warning("No more submissions available.")
     else:
