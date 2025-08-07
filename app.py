@@ -9,6 +9,12 @@ import contextlib
 import pandas as pd
 from db import init_db, update_team_score, get_leaderboard
 
+import streamlit as st
+from streamlit_autorefresh import st_autorefresh
+st_autorefresh(interval=2000, limit=100, key="fizzbuzzcounter")
+
+
+
 # Load environment variables
 # load_dotenv()
 
@@ -299,20 +305,52 @@ if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
     st.markdown("---")
 
 elif st.session_state["show_leaderboard"]:
+    import time
     st.title("🏆 Competition Leaderboard")
     st.markdown("### Current standings for all teams across industries")
+
+
+    # # Auto-refresh every 1 second
+    # refresh_placeholder = st.empty()
+    # if "_leaderboard_last_refresh" not in st.session_state:
+    #     st.session_state["_leaderboard_last_refresh"] = time.time()
+    # if time.time() - st.session_state["_leaderboard_last_refresh"] > 1:
+    #     st.session_state["_leaderboard_last_refresh"] = time.time()
+    #     st.rerun()
+    # else:
+    #     refresh_placeholder.markdown("<span style='display:none'></span>", unsafe_allow_html=True)
+    #     time.sleep(0.1)
+
+    # Polling interval in seconds
+    # poll_interval = 10
     
+    # # Store last update timestamp in session state
+    # if "last_update" not in st.session_state:
+    #     st.session_state.last_update = time.time()
+    
+    # # Refresh logic
+    # if time.time() - st.session_state.last_update > poll_interval:
+    #     st.session_state.last_update = time.time()
+    #     st.rerun()
+
+
+
+
+    # Manual refresh button
+    if st.button("🔄 Refresh Leaderboard"):
+        st.rerun()
+
     # Back button
     if st.button("← Back to Home", type="secondary"):
         st.session_state["show_leaderboard"] = False
         st.session_state["main"] = False
         st.rerun()
-    
+
     st.markdown("---")
-    
+
     # Fetch leaderboard from SQLite DB
     leaderboard = get_leaderboard()
-    
+
     if leaderboard:
         # Use real data from database
         leaderboard_rows = [
@@ -325,10 +363,10 @@ elif st.session_state["show_leaderboard"]:
         # Remove Rank column as it's not needed for display
         if 'Rank' in df.columns:
             df = df.drop('Rank', axis=1)
-    
+
     # Create a styled dataframe
     st.markdown("#### 📊 Team Rankings")
-    
+
     # Highlight top 3 teams
     def highlight_top_teams(row):
         if row.name == 0:  # First place
@@ -339,10 +377,10 @@ elif st.session_state["show_leaderboard"]:
             return ['background-color: #CD7F32; font-weight: bold'] * len(row)  # Bronze
         else:
             return [''] * len(row)
-    
+
     styled_df = df.style.apply(highlight_top_teams, axis=1)
     st.dataframe(styled_df, use_container_width=True, height=400)
-    
+
     # Summary stats
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -354,7 +392,7 @@ elif st.session_state["show_leaderboard"]:
             st.metric("Total Submissions", "N/A")
     with col3:
         st.metric("Average Score", f"{df['Score'].mean():.0f}" if not df.empty else "0")
-    
+
     st.markdown("---")
     st.markdown("*Leaderboard updates in real-time during the competition*")
 
@@ -494,10 +532,9 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                 )
             
             # Update leaderboard in SQLite DB with highest score for this team
-            if evaluation:
-                team_name = st.session_state["team"]
-                score = evaluation.overall_score
-                update_team_score(team_name, score)
+            team_name = st.session_state["team"]
+            score = evaluation.overall_score if evaluation else 0
+            update_team_score(team_name, score)
 
             # Show original prompt for reference
             st.markdown("---")
