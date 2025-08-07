@@ -3,8 +3,8 @@ import pandas as pd
 from streamlit_autorefresh import st_autorefresh
 from db import get_leaderboard, clear_leaderboard
 
-# Auto-refresh every 2 seconds
-st_autorefresh(interval=2000, limit=100, key="leaderboard_refresh")
+# Auto-refresh every 2 seconds (no limit)
+st_autorefresh(interval=2000, limit=None, key="leaderboard_refresh")
 
 st.set_page_config(page_title="Leaderboard", page_icon="🏆", layout="wide")
 
@@ -20,29 +20,41 @@ st.markdown("---")
 # Fetch leaderboard from SQLite DB
 leaderboard = get_leaderboard()
 
+# Always create a 6-row table
 if leaderboard:
-    # Use real data from database
-    leaderboard_rows = [
-        {
-            "Rank": f"{idx + 1} 🥇" if idx == 0 else f"{idx + 1} 🥈" if idx == 1 else f"{idx + 1} 🥉" if idx == 2 else idx + 1,
-            "Team": row[0],
-            "Score": row[1],
-            "Comment from Agent Lee": row[3] if row[3] else "No comment yet",
-        }
-        for idx, row in enumerate(leaderboard)
-    ]
+    # Use real data from database for existing entries
+    leaderboard_rows = []
+    for i in range(6):  # Always create 6 rows
+        if i < len(leaderboard):
+            # Use real data for this row
+            row = leaderboard[i]
+            leaderboard_rows.append({
+                "Rank": f"{i + 1} 🥇" if i == 0 else f"{i + 1} 🥈" if i == 1 else f"{i + 1} 🥉" if i == 2 else i + 1,
+                "Team": row[0],
+                "Score": row[1],
+                "Comment from Agent Lee": row[3] if row[3] else "No comment yet",
+            })
+        else:
+            # Create empty row for remaining slots
+            leaderboard_rows.append({
+                "Rank": f"{i + 1} 🥇" if i == 0 else f"{i + 1} 🥈" if i == 1 else f"{i + 1} 🥉" if i == 2 else i + 1,
+                "Team": "",
+                "Score": "",
+                "Comment from Agent Lee": "",
+            })
     df = pd.DataFrame(leaderboard_rows)
 else:
-    # Fallback to demo data if no real data exists
-    demo_data = [
+    # Create blank table with 6 empty rows
+    blank_data = [
         {
-            "Rank": "🥇 1",
-            "Team": "Alpha Consultants",
-            "Score": 2450,
-            "Comment from Agent Lee": "GREAT work Alpha Consultants! 2450 points - that's what I call WINNING! Keep it up! #MAGA",
+            "Rank": f"{i} 🥇" if i == 1 else f"{i} 🥈" if i == 2 else f"{i} 🥉" if i == 3 else i,
+            "Team": "",
+            "Score": "",
+            "Comment from Agent Lee": "",
         }
+        for i in range(1, 7)
     ]
-    df = pd.DataFrame(demo_data)
+    df = pd.DataFrame(blank_data)
 
 # Create a styled dataframe
 st.markdown("#### 📊 Team Rankings")
@@ -69,7 +81,7 @@ def create_leaderboard_html(df):
     }
     .leaderboard-table .rank-col {
         width: 60px;
-        text-align: center;
+        text-align: left;
     }
     .leaderboard-table .team-col {
         width: 150px;
@@ -141,7 +153,14 @@ col1, col2 = st.columns(2)
 with col1:
     st.metric("Total Teams", len(df))
 with col2:
-    st.metric("Average Score", f"{df['Score'].mean():.0f}" if not df.empty else "0")
+    # Convert Score column to numeric, replacing empty strings with NaN
+    numeric_scores = pd.to_numeric(df['Score'], errors='coerce')
+    # Calculate mean only if there are valid scores
+    if numeric_scores.notna().any():
+        avg_score = numeric_scores.mean()
+        st.metric("Average Score", f"{avg_score:.0f}")
+    else:
+        st.metric("Average Score", "0")
 
 st.markdown("---")
 st.markdown("*Leaderboard updates in real-time during the competition*")
