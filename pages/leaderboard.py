@@ -26,8 +26,7 @@ if leaderboard:
         {
             "Team": row[0],
             "Score": row[1],
-            "Last Submission": row[2],
-            "Submissions": 1,
+            "Comment from Agent Lee": row[3] if row[3] else "No comment yet",
         }
         for row in leaderboard
     ]
@@ -36,17 +35,12 @@ else:
     # Fallback to demo data if no real data exists
     demo_data = [
         {
-            "Rank": 1,
             "Team": "Alpha Consultants",
-            "Industry": "Technology",
             "Score": 2450,
-            "Submissions": 8,
+            "Comment from Agent Lee": "GREAT work Alpha Consultants! 2450 points - that's what I call WINNING! Keep it up! #MAGA",
         }
     ]
     df = pd.DataFrame(demo_data)
-    # Remove Rank column as it's not needed for display
-    if "Rank" in df.columns:
-        df = df.drop("Rank", axis=1)
 
 # Create a styled dataframe
 st.markdown("#### 📊 Team Rankings")
@@ -66,15 +60,10 @@ styled_df = df.style.apply(highlight_top_teams, axis=1)
 st.dataframe(styled_df, use_container_width=True, height=400)
 
 # Summary stats
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 with col1:
     st.metric("Total Teams", len(df))
 with col2:
-    if "Submissions" in df.columns:
-        st.metric("Total Submissions", df["Submissions"].sum())
-    else:
-        st.metric("Total Submissions", "N/A")
-with col3:
     st.metric("Average Score", f"{df['Score'].mean():.0f}" if not df.empty else "0")
 
 st.markdown("---")

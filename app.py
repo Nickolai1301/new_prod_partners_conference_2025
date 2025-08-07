@@ -509,7 +509,7 @@ elif st.session_state["main"]:
             # Update leaderboard in SQLite DB with highest score for this team
             team_name = st.session_state["team"]
             score = evaluation.overall_score if evaluation else 0
-            update_team_score(team_name, score)
+            update_team_score(team_name, score, trump_tweet)
 
             # Show original prompt for reference
             st.markdown("---")
