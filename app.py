@@ -152,7 +152,7 @@ Structure your analysis professionally with logical sections and clear formattin
         return full_response
 
     except Exception as e:
-        error_msg = f"**Error generating AI response:** {str(e)}"
+        error_msg = f"**Error AI response:** {str(e)}"
         placeholder.markdown(error_msg)
         return error_msg
 
@@ -479,7 +479,7 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
             # Step 3: Generate Trump tweet based on score and AI response
             trump_tweet = None
             if evaluation:
-                with st.spinner("🐦 Generating Trump tweet..."):
+                with st.spinner("🐦 Agent Lee is tweeting! ..."):
                     trump_tweet = generate_trump_tweet(
                         evaluation.overall_score, ai_response, st.session_state["team"]
                     )
@@ -532,8 +532,8 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
             # Display Trump Tweet
             if trump_tweet:
                 st.markdown("---")
-                st.markdown("### 🐦 Trump Tweet Response")
-                st.markdown("*What would Trump tweet about your performance?*")
+                st.markdown("### 🐦 Lee Tweet Response")
+                st.markdown("*What would Agent tweet about your performance?*")
 
                 # Generate and display the tweet image
                 if TWEET_GENERATOR_AVAILABLE:
@@ -551,11 +551,13 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                         
                         # Display the generated image directly
                         if os.path.exists(image_path):
+                            st.image(image_path, width=1200)
+
                             # Wrap image in a container with manual width control
-                            with st.container():
-                                col1, col2, col3 = st.columns([1, 2, 1])  # Center the image
-                                with col2:
-                                    st.image(image_path, use_column_width=True)
+                            # with st.container():
+                            #     col1, col2, col3 = st.columns([1, 4, 1])  # Center the image
+                            #     with col2:
+                            #         st.image(image_path, use_container_width=True)
                         else:
                             st.error("⚠️ Tweet image file not found")
                         

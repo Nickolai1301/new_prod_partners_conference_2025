@@ -10,6 +10,8 @@ from datetime import datetime
 margin_x = 32
 margin_y = 28
 final_size = (1200, 2400)
+# final_size = (2000, 2400)  # Updated width to 2000 pixels
+
 twitter_name_x = 150
 twitter_name_y = margin_y + 8
 
