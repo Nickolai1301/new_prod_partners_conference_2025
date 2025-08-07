@@ -465,7 +465,7 @@ elif st.session_state["main"]:
                         image_path = os.path.join(os.path.dirname(__file__), "generated_tweets", filename)
                         
                         create_tweet_image(
-                            twitter_name="Agent J. Lee",
+                            twitter_name="Agent D. Lee",
                             twitter_account="@realAgentLee",
                             text=trump_tweet,
                             date_text=get_current_timestamp(),
