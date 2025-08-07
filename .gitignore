@@ -20,6 +20,4 @@ test_venv/
 *.venv
 *cpython-313*
 
-/generated_tweets
-leaderboard.db
 leaderboard.db
