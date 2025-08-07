@@ -2,18 +2,18 @@
 Evaluation module for rating user prompts using LLM
 This module provides functionality to evaluate and score prompts based on various criteria.
 """
-
+import streamlit as st
 from openai import OpenAI
 import os
 from typing import Dict, List, Optional
 from dataclasses import dataclass
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 # Initialize OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
 @dataclass
 class PromptEvaluation:

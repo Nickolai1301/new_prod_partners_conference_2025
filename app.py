@@ -2,7 +2,7 @@ import streamlit as st
 from evaluation import PromptEvaluator
 from openai import OpenAI
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import sys
 from io import StringIO
 import contextlib
@@ -10,7 +10,7 @@ import pandas as pd
 from db import init_db, update_team_score, get_leaderboard
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 # Access OpenAI API key from Streamlit secrets
 # if "OPENAI_API_KEY" in st.secrets:
