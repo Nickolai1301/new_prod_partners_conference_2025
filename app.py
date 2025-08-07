@@ -10,6 +10,21 @@ import contextlib
 import pandas as pd
 from db import init_db, update_team_score, get_leaderboard
 
+# Import tweet generator function with error handling
+try:
+    import sys
+    import os
+    sys.path.append(os.path.join(os.path.dirname(__file__), 'tweet_generator'))
+    from generate_tweet_image import create_tweet_image
+    TWEET_GENERATOR_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Tweet generator not available: {e}")
+    TWEET_GENERATOR_AVAILABLE = False
+    def create_tweet_image(*args, **kwargs):
+        return "tweet_generator_not_available.png"
+
+from datetime import datetime
+
 # Load environment variables
 # load_dotenv()
 
@@ -75,6 +90,17 @@ Draft up a compelling business case, that clearly articulates why your industry 
 Think innovation, impact, and intention.
 
 """
+def get_current_timestamp():
+    """
+    Generate current date and time in Twitter format.
+
+    Returns:
+            str: Formatted timestamp (e.g., "2:45 pm - 7 Aug 2025")
+    """
+    now = datetime.now()
+    time_str = now.strftime("%I:%M %p").lower().replace("am", "am").replace("pm", "pm")
+    date_str = now.strftime("%d %b %Y")
+    return f"{time_str} - {date_str}"
 
 
 def generate_ai_response_streaming(user_prompt: str, industry: str, placeholder):
@@ -509,19 +535,59 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                 st.markdown("### 🐦 Trump Tweet Response")
                 st.markdown("*What would Trump tweet about your performance?*")
 
-                # Style the tweet to look like a real tweet
-                st.markdown(
-                    f"""
-                    <div style='padding:15px;background:#1DA1F2;color:white;border-radius:15px;font-family:system-ui;'>
-                    <div style='display:flex;align-items:center;margin-bottom:10px;'>
-                    <strong>@realDonaldTrump</strong>
-                    <span style='color:#8ED0FF;margin-left:5px;'>✓</span>
-                    </div>
-                    <div style='font-size:16px;line-height:1.4;'>{trump_tweet}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                # Generate and display the tweet image
+                if TWEET_GENERATOR_AVAILABLE:
+                    try:
+                        image_path = create_tweet_image(
+                            twitter_name="Agent J. Lee",
+                            twitter_account="@realAgentLee",
+                            text=trump_tweet,
+                            date_text=get_current_timestamp(),
+                            image_url=os.path.join(os.path.dirname(__file__), "tweet_generator", "tweet-image.jpg"),
+                            is_verified=True,
+                            images=None,
+                            destination="generated-image.png"
+                        )
+                        
+                        # Display the generated image directly
+                        if os.path.exists(image_path):
+                            # Wrap image in a container with manual width control
+                            with st.container():
+                                col1, col2, col3 = st.columns([1, 2, 1])  # Center the image
+                                with col2:
+                                    st.image(image_path, use_column_width=True)
+                        else:
+                            st.error("⚠️ Tweet image file not found")
+                        
+                    except Exception as e:
+                        st.warning(f"⚠️ Could not generate tweet image: {e}")
+                        # Fallback to HTML tweet display if image generation fails
+                        st.markdown(
+                            f"""
+                            <div style='padding:15px;background:#1DA1F2;color:white;border-radius:15px;font-family:system-ui;'>
+                            <div style='display:flex;align-items:center;margin-bottom:10px;'>
+                            <strong>@realDonaldTrump</strong>
+                            <span style='color:#8ED0FF;margin-left:5px;'>✓</span>
+                            </div>
+                            <div style='font-size:16px;line-height:1.4;'>{trump_tweet}</div>
+                            </div>
+                            """,
+                            unsafe_allow_html=True,
+                        )
+                else:
+                    # Fallback to HTML tweet display if tweet generator not available
+                    st.markdown(
+                        f"""
+                        <div style='padding:15px;background:#1DA1F2;color:white;border-radius:15px;font-family:system-ui;'>
+                        <div style='display:flex;align-items:center;margin-bottom:10px;'>
+                        <strong>@realDonaldTrump</strong>
+                        <span style='color:#8ED0FF;margin-left:5px;'>✓</span>
+                        </div>
+                        <div style='font-size:16px;line-height:1.4;'>{trump_tweet}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
             # Update leaderboard in SQLite DB with highest score for this team
             if evaluation:
