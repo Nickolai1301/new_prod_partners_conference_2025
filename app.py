@@ -55,7 +55,9 @@ if "team" not in st.session_state:
 if "main" not in st.session_state:
     st.session_state["main"] = False
 if "submissions_left" not in st.session_state:
-    st.session_state["submissions_left"] = 3
+    st.session_state["submissions_left"] = 2
+if "submissions_made" not in st.session_state:
+    st.session_state["submissions_made"] = 0
 if "show_case_study" not in st.session_state:
     st.session_state["show_case_study"] = False
 if "evaluator" not in st.session_state:
@@ -328,17 +330,21 @@ elif st.session_state["main"]:
     st.markdown(case_study_content)
     st.markdown("---")
     st.markdown("Enter your prompt below and submit to see the AI response.")
-    st.info(f"Submissions left: {st.session_state['submissions_left']}")
+    submissions_remaining = 3 - st.session_state["submissions_made"]
+    st.info(f"Submissions left: {submissions_remaining}")
     user_prompt = st.text_area(
         "Prompt:", height=100, placeholder="Type your question or prompt here..."
     )
-    submit_disabled = st.session_state["submissions_left"] == 0
+    submit_disabled = submissions_remaining <= 0
     submit = st.button("Submit Prompt", type="primary", disabled=submit_disabled)
     if submit:
         if not user_prompt.strip():
             st.warning("Please enter a prompt before submitting.")
+        elif submissions_remaining <= 0:
+            st.error("Maximum of 3 submissions reached.")
         else:
             st.session_state["submissions_left"] -= 1
+            st.session_state["submissions_made"] += 1
 
             # Capture terminal output during processing
             @contextlib.contextmanager
@@ -465,7 +471,7 @@ elif st.session_state["main"]:
                         image_path = os.path.join(os.path.dirname(__file__), "generated_tweets", filename)
                         
                         create_tweet_image(
-                            twitter_name="Agent J. Lee",
+                            twitter_name="Agent D. Lee",
                             twitter_account="@realAgentLee",
                             text=trump_tweet,
                             date_text=get_current_timestamp(),
@@ -527,9 +533,15 @@ elif st.session_state["main"]:
             st.markdown("### 📝 Your Original Prompt")
             with st.expander("Show submitted prompt", expanded=False):
                 st.code(user_prompt, language="text")
+            
+            # Rerun to update the submissions counter
+            st.rerun()
 
     elif submit_disabled:
-        st.warning("No more submissions available.")
+        if submissions_remaining <= 0:
+            st.warning("Maximum of 3 submissions reached. No more submissions available.")
+        else:
+            st.warning("No more submissions available.")
     else:
         st.info("Submit a prompt to see the AI response here.")
     st.markdown("---")
