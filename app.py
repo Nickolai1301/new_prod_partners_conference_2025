@@ -105,8 +105,94 @@ Please provide a comprehensive business analysis response based on the case stud
         return f"Error generating AI response: {str(e)}"
 
 if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
-    st.title("Welcome to the Competition Seminar App")
-    st.markdown("Enter your team name and select your industry below, then click 'Get Started' to begin.")
+    st.title("🎯 Welcome to the Prompt-Off: The Battle for Budget! 💥")
+
+
+    # Insert homepage.txt content here, formatted for Streamlit
+    homepage_content = """
+<p>Think your industry group deserves a bigger slice of the pie? Ready to make the case for why your team should get extra investment from leadership?</p>
+<p>Here’s your chance to prove it—<b>prompt-style</b>.</p>
+
+<div style='margin-bottom:1em;'></div>
+<h3 style='margin-bottom:0.2em;'>What is this?</h3>
+<ul>
+  <li>This is no ordinary pitch session. It’s a competitive, high-stakes, slightly sassy prompt showdown.</li>
+  <li>Battle it out with your fellow Partners to craft the <b>strongest business case</b> for additional funding.</li>
+</ul>
+
+<h3 style='margin-bottom:0.2em;'>🔄 The Format</h3>
+<ul>
+  <li><b>Three chances</b> to write your business case prompt.</li>
+  <li>After each of your first two submissions, you’ll receive <b>sassy, unfiltered feedback</b> to sharpen your thinking.</li>
+  <li>On the third round, you’ll submit your <b>final prompt</b>—the one that hits the mark.</li>
+</ul>
+
+<h3 style='margin-bottom:0.2em;'>🧠 What’s the Ask?</h3>
+<ul>
+  <li>Craft a compelling prompt that answers:</li>
+</ul>
+<blockquote style='font-size:1.1em; color:#36a8f5; border-left:4px solid #36a8f5; margin:0 0 1em 0; padding:0.5em 1em;'>
+  Why should your industry group receive additional investment from our leader?
+</blockquote>
+<ul>
+  <li>Think <b>innovation</b>, <b>impact</b>, and <b>intention</b>.</li>
+</ul>
+"""
+
+    homepage_content2 = """
+
+<p>Think your industry group deserves a bigger slice of the pie? Ready to make the case for why your team should get extra investment from leadership?</p>
+<p>Here’s your chance to prove it—<b>prompt-style</b>.</p>
+
+<h3>What is this?</h3>
+<ul>
+    <li>This is no ordinary pitch session. It’s a competitive, high-stakes, slightly sassy prompt showdown.</li>
+    <li>Battle it out with your fellow Partners to craft the <b>strongest business case</b> for additional funding.</li>
+</ul>
+
+<h3>🔄 The Format</h3>
+<ul>
+    <li><b>Three chances</b> to write your business case prompt.</li>
+    <li>After each of your first two submissions, you’ll receive <b>sassy, unfiltered feedback</b> to sharpen your thinking.</li>
+    <li>On the third round, you’ll submit your <b>final prompt</b>—the one that hits the mark.</li>
+</ul>
+
+<h3>🧠 What’s the Ask?</h3>
+<ul>
+    <li>Craft a compelling prompt that answers:</li>
+</ul>
+<blockquote style='font-size:1.1em; color:#36a8f5; border-left:4px solid #36a8f5; margin:0 0 1em 0; padding:0.5em 1em;'>
+    Why should our industry group receive additional investment from our leader?
+</blockquote>
+<ul>
+    <li>Your prompt should outline a clear, innovative, and impact-driven opportunity that will:</li>
+    <ul>
+        <li>Strengthen M&A services and relationships with key client accounts</li>
+        <li>Unlock growth potential for your industry</li>
+        <li>Position your group as a leader in delivering differentiated, future-focused M&A value</li>
+    </ul>
+</ul>
+
+<h3>🏆 What Makes a Winning Prompt?</h3>
+<ul>
+    <li><b>Specific.</b> <b>Bold.</b> Grounded in reality—but aspirational.</li>
+    <li>Shows how funding will turn strategy into action.</li>
+    <li>Makes leadership sit up and say: “Now that’s something I want to back.”</li>
+</ul>
+
+<h3>💡 Bonus Tip</h3>
+<ul>
+    <li>Have fun with it—but don’t forget the real goal: winning hearts, minds, and budgets.</li>
+</ul>
+
+<p>Game on. Let’s see which industry brings the strongest case to the table. 🔥</p>
+<p><b>Ready… set… PROMPT!</b></p>
+
+"""
+
+    st.markdown(homepage_content2, unsafe_allow_html=True)
+    get_started = """<h3>🏃‍♂️Enter a team name and let's get started!</h3><p>Enter your team name and select your industry below, then click 'Get Started' to begin.</p>"""
+    st.markdown(get_started, unsafe_allow_html=True)
     industry_list = ["Health", "Technology", "Gas", "Finance", "Retail", "Manufacturing", "Energy"]
     team_name = st.text_input("Custom Team Name:", max_chars=30, placeholder="e.g. Team_1")
     selected_industry = st.selectbox("Select your industry:", industry_list)
@@ -181,7 +267,7 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
     #         with col2:
     #             st.markdown(
     #                 """
-    #                 <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px solid #007acc; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);'>
+    #                 <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px solid #36a8f5; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);'>
     #                 """,
     #                 unsafe_allow_html=True
     #             )
@@ -260,7 +346,7 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                 if ai_response and not ai_response.startswith("Error"):
                     st.markdown(
                         f"""
-                        <div style='min-height:250px;overflow-y:auto;overflow-x:hidden;padding:15px;background:#23292e;border-radius:8px;border-left:4px solid #007acc;'>
+                        <div style='min-height:250px;overflow-y:auto;overflow-x:hidden;padding:15px;background:#23292e;border-radius:8px;border-left:4px solid #36a8f5;'>
                         <div style='white-space:pre-wrap;line-height:1.6;color:#ffffff;'>{ai_response}</div>
                         </div>
                         """,
