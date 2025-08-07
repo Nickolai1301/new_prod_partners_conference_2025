@@ -13,7 +13,8 @@ env.bak/
 venv.bak/
 
 # Virtual environment folders (common variations)
-*/venv/
-*/venv
-*/.venv/
-*/.venv
+test_venv/
+*venv/
+*venv
+*.venv/
+*.venv
