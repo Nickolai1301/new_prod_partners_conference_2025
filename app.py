@@ -512,4 +512,3 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
     else:
         st.info("Submit a prompt to see the AI response here.")
     st.markdown("---")
-    st.markdown("Built for the seminar competition.")
