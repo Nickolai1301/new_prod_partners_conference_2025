@@ -465,9 +465,7 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
             )
 
             # Single column for evaluation (full width)
-            st.markdown("### 📊 Prompt Evaluation")
-            st.markdown("*Quality assessment of your original prompt:*")
-
+            st.markdown("### 📊 Business Case Evaluation")
             if evaluation:
                 # Overall score with color coding
                 score_color = (
