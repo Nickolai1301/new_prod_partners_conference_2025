@@ -194,23 +194,6 @@ def demo_evaluation():
             "prompt": "Analyze this acquisition",
             "team": "Team Alpha",
             "industry": "Technology"
-        },
-        {
-            "prompt": """As a senior M&A consultant, please provide a comprehensive business case analysis for TechCorp's potential acquisition of PayFlow Solutions. 
-
-            Background: TechCorp ($200M revenue, fintech payments) is considering acquiring PayFlow Solutions ($45M revenue, 25% growth, AI-powered invoice management).
-
-            Please structure your analysis to include:
-            1. Strategic rationale and synergies assessment
-            2. Financial evaluation including valuation range and ROI projections
-            3. Integration planning and cultural considerations
-            4. Market positioning and competitive advantages
-            5. Risk assessment and mitigation strategies
-            6. Implementation timeline and key milestones
-
-            Focus on quantitative analysis where possible and provide actionable recommendations for the investment committee.""",
-            "team": "Team Beta",
-            "industry": "Finance"
         }
     ]
     

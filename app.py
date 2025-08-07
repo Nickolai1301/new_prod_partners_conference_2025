@@ -46,6 +46,8 @@ if "last_evaluation" not in st.session_state:
     st.session_state["last_evaluation"] = None
 if "last_ai_response" not in st.session_state:
     st.session_state["last_ai_response"] = None
+if "last_trump_tweet" not in st.session_state:
+    st.session_state["last_trump_tweet"] = None
 if "leaderboard_data" not in st.session_state:
     st.session_state["leaderboard_data"] = [
         {"Rank": 1, "Team": "Alpha Consultants", "Industry": "Technology", "Score": 2450, "Submissions": 8},
@@ -65,20 +67,11 @@ if "db_initialized" not in st.session_state:
 
 # Case Study Demo Content
 case_study_content = """
-# 📊 Demo Case Study: TechCorp Acquisition
+# YOUR CHALLENGE
 
-## Background
-TechCorp is a mid-sized fintech company specializing in digital payment solutions for small and medium enterprises (SMEs). The company has shown consistent growth over the past 3 years and is now considering strategic acquisition opportunities.
+Draft up a compelling business case, that clearly articulates why your industry group should receive additional funding from AI Agent Lee. 
 
-## Your Challenge
-As a senior consultant, you've been asked to analyze the following acquisition scenario:
-
-### Target Company: PayFlow Solutions
-- **Industry**: Financial Technology
-- **Revenue**: $45M annually (growing 25% YoY)
-- **Employees**: 180 people
-- **Key Product**: AI-powered invoice management platform
-- **Market Position**: #3 in SME invoice automation space
+Think innovation, impact, and intention.
 
 """
 
@@ -136,6 +129,64 @@ Structure your analysis professionally with logical sections and clear formattin
         error_msg = f"**Error generating AI response:** {str(e)}"
         placeholder.markdown(error_msg)
         return error_msg
+
+def generate_trump_tweet(score: float, ai_response: str, team_name: str) -> str:
+    """Generate a Trump-style tweet based on the evaluation score and AI response"""
+    try:
+        # Load Trump prompt style from file
+        with open("trump_prompt.txt", "r", encoding="utf-8") as file:
+            trump_style_prompt = file.read()
+        
+        # Create the prompt for generating Trump tweet
+        tweet_prompt = f"""
+{trump_style_prompt}
+
+You are Donald Trump commenting on a business prompt competition where teams submit prompts and get scored. 
+
+CONTEXT:
+- Team: {team_name}
+- Their prompt got a score of {score:.1f}/100
+- The AI generated this response: {ai_response[:500]}...
+
+Generate a single Trump-style tweet (max 280 characters) that:
+1. Comments on their score and performance 
+2. Uses Trump's signature style (ALL CAPS for emphasis, exclamation points, superlatives)
+3. Be either congratulatory (if score >= 80), mildly critical (60-79), or harsh (below 60)
+4. Keep it business/competition focused
+5. Make it authentic to Trump's tweeting style
+
+IMPORTANT: 
+- Only return the tweet text, nothing else
+- Stay under 280 characters
+- Use Trump's signature phrases and style
+- Be entertaining but not offensive
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini-2025-04-14",
+            messages=[
+                {"role": "system", "content": "You are a tweet generator that creates authentic Donald Trump-style tweets. Focus on his business/competition commentary style with signature capitalization and phrases."},
+                {"role": "user", "content": tweet_prompt}
+            ],
+            temperature=0.8,
+            max_tokens=100
+        )
+        
+        tweet = response.choices[0].message.content.strip()
+        # Remove quotes if they exist
+        if tweet.startswith('"') and tweet.endswith('"'):
+            tweet = tweet[1:-1]
+        
+        return tweet
+        
+    except Exception as e:
+        # Fallback tweet if generation fails
+        if score >= 80:
+            return f"GREAT work {team_name}! {score:.0f} points - that's what I call WINNING! Keep it up! #MAGA"
+        elif score >= 60:
+            return f"{team_name} scored {score:.0f} - not bad, but could be MUCH better. Step it up! #Competition"
+        else:
+            return f"{team_name} got {score:.0f} points. SAD! Need to work harder. Much harder! #LosingBigly"
 
 if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
     st.title("🎯 Welcome to the Prompt-Off: The Battle for Budget! 💥")
@@ -226,7 +277,8 @@ if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
     get_started = """<h3>🏃‍♂️Enter a team name and let's get started!</h3><p>Enter your team name and select your industry below, then click 'Get Started' to begin.</p>"""
     st.markdown(get_started, unsafe_allow_html=True)
 
-    industry_list = ["Health", "Technology", "Gas", "Finance", "Retail", "Manufacturing", "Energy"]
+
+    industry_list = ["TMT", "FSI", "Health", "INFA", "PE", "Consumer"]
     team_name = st.text_input("Custom Team Name:", max_chars=30, placeholder="e.g. Team_1")
     selected_industry = st.selectbox("Select your industry:", industry_list)
 
@@ -316,7 +368,7 @@ elif st.session_state["show_leaderboard"]:
         st.rerun()
 
 elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
-    st.title(f"Main Page - {st.session_state['team']}")
+    st.title(f"PROMPT ARENA - {st.session_state['team']}")
     st.markdown("---")
     st.markdown(case_study_content)
     st.markdown("---")  
@@ -348,7 +400,7 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
             
             # Step 1: Generate AI response using case study + user prompt with streaming
             st.markdown("### 🤖 AI Response")
-            st.markdown("*Based on the case study context and your prompt:*")
+            st.markdown("*Based on your prompt:*")
             
             # Create placeholder for streaming response
             response_placeholder = st.empty()
@@ -380,33 +432,25 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                 if terminal_output.strip():
                     st.session_state["terminal_output"].append(f"[Prompt Evaluation] {terminal_output.strip()}")
             
-            # Display results
-            st.success("✅ AI response generated and prompt evaluated!")
-            
-            # Create two columns for AI response and evaluation
-            col1, col2 = st.columns([1, 1])
-            
-            with col1:
-                st.markdown("### 🤖 AI Response")
-                st.markdown("*Based on the case study context and your prompt:*")
-                
-                if ai_response and not ai_response.startswith("Error"):
-                    st.markdown(
-                        f"""
-                        <div style='min-height:250px;overflow-y:auto;overflow-x:hidden;padding:15px;background:#23292e;border-radius:8px;border-left:4px solid #36a8f5;'>
-                        <div style='white-space:pre-wrap;line-height:1.6;color:#ffffff;'>{ai_response}</div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
+            # Step 3: Generate Trump tweet based on score and AI response
+            trump_tweet = None
+            if evaluation:
+                with st.spinner("🐦 Generating Trump tweet..."):
+                    trump_tweet = generate_trump_tweet(
+                        evaluation.overall_score, 
+                        ai_response, 
+                        st.session_state["team"]
                     )
-                else:
-                    st.error(f"⚠️ {ai_response}")
+                    st.session_state["last_trump_tweet"] = trump_tweet
             
-            with col2:
-                st.markdown("### 📊 Prompt Evaluation")
-                st.markdown("*Quality assessment of your original prompt:*")
-                
-                if evaluation:
+            # Display results
+            st.success("✅ AI response generated, prompt evaluated, and Trump tweet created!")
+            
+            # Single column for evaluation (full width)
+            st.markdown("### 📊 Prompt Evaluation")
+            st.markdown("*Quality assessment of your original prompt:*")
+            
+            if evaluation:
                     # Overall score with color coding
                     score_color = "#28a745" if evaluation.overall_score >= 80 else "#ffc107" if evaluation.overall_score >= 60 else "#dc3545"
                     st.markdown(
@@ -428,8 +472,28 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     }
                     df_scores = pd.DataFrame(score_data)
                     st.dataframe(df_scores, use_container_width=True, hide_index=True)
-                else:
-                    st.error("⚠️ Evaluation failed. Please try again.")
+            else:
+                st.error("⚠️ Evaluation failed. Please try again.")
+            
+            # Display Trump Tweet
+            if trump_tweet:
+                st.markdown("---")
+                st.markdown("### 🐦 Trump Tweet Response")
+                st.markdown("*What would Trump tweet about your performance?*")
+                
+                # Style the tweet to look like a real tweet
+                st.markdown(
+                    f"""
+                    <div style='padding:15px;background:#1DA1F2;color:white;border-radius:15px;font-family:system-ui;'>
+                    <div style='display:flex;align-items:center;margin-bottom:10px;'>
+                    <strong>@realDonaldTrump</strong>
+                    <span style='color:#8ED0FF;margin-left:5px;'>✓</span>
+                    </div>
+                    <div style='font-size:16px;line-height:1.4;'>{trump_tweet}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
             
             # Update leaderboard in SQLite DB with highest score for this team
             if evaluation:
