@@ -428,19 +428,6 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     }
                     df_scores = pd.DataFrame(score_data)
                     st.dataframe(df_scores, use_container_width=True, hide_index=True)
-                    
-                    # Feedback
-                    st.markdown("**💭 AI Feedback:**")
-                    st.info(evaluation.feedback)
-                    
-                    # Strengths and improvements in expandable sections
-                    with st.expander("✅ Strengths"):
-                        for strength in evaluation.strengths:
-                            st.write(f"• {strength}")
-                    
-                    with st.expander("🔧 Areas for Improvement"):
-                        for improvement in evaluation.improvements:
-                            st.write(f"• {improvement}")
                 else:
                     st.error("⚠️ Evaluation failed. Please try again.")
             
