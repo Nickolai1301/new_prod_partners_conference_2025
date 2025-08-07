@@ -42,9 +42,6 @@ class PromptEvaluation:
     specificity_score: float
     context_score: float
     structure_score: float
-    feedback: str
-    strengths: List[str]
-    improvements: List[str]
 
 class PromptEvaluator:
     """Class to evaluate prompts using LLM"""
@@ -57,25 +54,12 @@ class PromptEvaluator:
             "context": "How well does the prompt provide necessary context?",
             "structure": "How well-structured and organized is the prompt?"
         }
-        self.feedback_tone = self._load_feedback_tone()
-    
-    def _load_feedback_tone(self) -> str:
-        """Load the feedback tone from the feedback_tone.txt file"""
-        try:
-            with open("feedback_tone.txt", "r", encoding="utf-8") as file:
-                return file.read().strip()
-        except FileNotFoundError:
-            # Fallback tone if file is not found
-            return """Be encouraging and positive while providing constructive feedback. 
-                     Focus on strengths and frame improvements as opportunities for growth."""
     
     def create_evaluation_prompt(self, user_prompt: str, industry: str = None) -> str:
         """Create a system prompt for evaluating user prompts"""
         
         evaluation_prompt = f"""
-{self.feedback_tone}
-
-You are an expert prompt engineer and business consultant evaluating prompts for M&A and business strategy analysis. Use the cheerful, encouraging tone described above in all your feedback.
+You are an expert prompt engineer and business consultant evaluating prompts for M&A and business strategy analysis.
 
 Please evaluate the following user prompt based on these criteria:
 
@@ -91,19 +75,16 @@ USER PROMPT TO EVALUATE:
 
 {f"INDUSTRY CONTEXT: {industry}" if industry else ""}
 
-Please provide your evaluation in the following JSON format, using the enthusiastic and encouraging tone throughout:
+Please provide your evaluation in the following JSON format:
 {{
     "overall_score": <float 0-100>,
     "clarity_score": <float 0-100>,
     "specificity_score": <float 0-100>, 
     "context_score": <float 0-100>,
-    "structure_score": <float 0-100>,
-    "feedback": "<encouraging overall feedback paragraph using the cheerful tone>",
-    "strengths": ["<positive strength 1>", "<positive strength 2>", "<positive strength 3>"],
-    "improvements": ["<encouraging improvement 1>", "<encouraging improvement 2>", "<encouraging improvement 3>"]
+    "structure_score": <float 0-100>
 }}
 
-Remember: Frame all feedback positively and encouragingly! Focus on business consulting and M&A context while maintaining an upbeat, supportive tone that makes the user excited to improve their prompting skills.
+Focus on providing accurate numerical scores for business consulting and M&A context evaluation.
 """
         return evaluation_prompt
     
@@ -143,10 +124,7 @@ Remember: Frame all feedback positively and encouragingly! Focus on business con
                     clarity_score=float(result.get("clarity_score", 0)),
                     specificity_score=float(result.get("specificity_score", 0)),
                     context_score=float(result.get("context_score", 0)),
-                    structure_score=float(result.get("structure_score", 0)),
-                    feedback=result.get("feedback", ""),
-                    strengths=result.get("strengths", []),
-                    improvements=result.get("improvements", [])
+                    structure_score=float(result.get("structure_score", 0))
                 )
             except json.JSONDecodeError:
                 # Fallback parsing if JSON is malformed
@@ -163,10 +141,7 @@ Remember: Frame all feedback positively and encouragingly! Focus on business con
             clarity_score=70.0,
             specificity_score=70.0,
             context_score=70.0,
-            structure_score=70.0,
-            feedback="Evaluation completed with limited parsing. Please check prompt formatting.",
-            strengths=["Prompt submitted successfully"],
-            improvements=["Consider more specific requirements", "Add more context", "Improve structure"]
+            structure_score=70.0
         )
     
     def batch_evaluate_prompts(self, prompts: List[Dict]) -> List[Dict]:
@@ -261,16 +236,6 @@ def demo_evaluation():
             print(f"Specificity: {evaluation.specificity_score:.1f}")
             print(f"Context: {evaluation.context_score:.1f}")
             print(f"Structure: {evaluation.structure_score:.1f}")
-            
-            print(f"\n💬 Feedback: {evaluation.feedback}")
-            
-            print(f"\n✅ Strengths:")
-            for strength in evaluation.strengths:
-                print(f"  • {strength}")
-                
-            print(f"\n🔧 Improvements:")
-            for improvement in evaluation.improvements:
-                print(f"  • {improvement}")
         
         print(f"\n{'-'*50}\n")
 
