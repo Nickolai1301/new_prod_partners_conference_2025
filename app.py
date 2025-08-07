@@ -448,12 +448,20 @@ elif st.session_state["main"]:
             if trump_tweet:
                 st.markdown("---")
                 st.markdown("### 🐦 Lee Tweet Response")
-                st.markdown("*What would Agent tweet about your performance?*")
+                st.markdown("*What did Agent Lee tweet about your performance?*")
 
                 # Generate and display the tweet image
                 if TWEET_GENERATOR_AVAILABLE:
                     try:
-                        image_path = create_tweet_image(
+                        # Create unique filename with team name and timestamp
+                        from datetime import datetime
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                        # Clean team name for filename (remove special characters)
+                        clean_team_name = "".join(c for c in st.session_state["team"] if c.isalnum() or c in (' ', '-', '_')).replace(' ', '_')
+                        filename = f"tweet_{clean_team_name}_{timestamp}.png"
+                        image_path = os.path.join(os.path.dirname(__file__), "generated_tweets", filename)
+                        
+                        create_tweet_image(
                             twitter_name="Agent J. Lee",
                             twitter_account="@realAgentLee",
                             text=trump_tweet,
@@ -461,18 +469,18 @@ elif st.session_state["main"]:
                             image_url=os.path.join(os.path.dirname(__file__), "tweet_generator", "tweet-image.jpg"),
                             is_verified=True,
                             images=None,
-                            destination="generated-image.png"
+                            destination=image_path
                         )
                         
                         # Display the generated image directly
                         if os.path.exists(image_path):
-                            st.image(image_path, width=1200)
+                        #     st.image(image_path, width=1200)
 
                             # Wrap image in a container with manual width control
-                            # with st.container():
-                            #     col1, col2, col3 = st.columns([1, 4, 1])  # Center the image
-                            #     with col2:
-                            #         st.image(image_path, use_container_width=True)
+                            with st.container():
+                                col1, col2, col3 = st.columns([1, 4, 1])  # Center the image
+                                with col2:
+                                    st.image(image_path, use_container_width=True)
                         else:
                             st.error("⚠️ Tweet image file not found")
                         
@@ -497,7 +505,7 @@ elif st.session_state["main"]:
                         f"""
                         <div style='padding:15px;background:#1DA1F2;color:white;border-radius:15px;font-family:system-ui;'>
                         <div style='display:flex;align-items:center;margin-bottom:10px;'>
-                        <strong>@realDonaldTrump</strong>
+                        <strong>@realAgentLee</strong>
                         <span style='color:#8ED0FF;margin-left:5px;'>✓</span>
                         </div>
                         <div style='font-size:16px;line-height:1.4;'>{trump_tweet}</div>

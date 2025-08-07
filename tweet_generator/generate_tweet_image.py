@@ -132,9 +132,36 @@ def generate_main_text_and_get_final_y(drawer, text):
     x_text_margin = margin_x
     text_lines_spacing = 10
     text_font = ImageFont.truetype(font_file, 46)
-    for line in textwrap.wrap(text, width=54):
+    
+    # Calculate available width for text (total width minus margins)
+    available_width = final_size[0] - (x_text_margin * 2)  # 1200 - 64 = 1136px
+    
+    # Split text into words and manually wrap to fit width
+    words = text.split()
+    lines = []
+    current_line = []
+    
+    for word in words:
+        # Test if adding this word would exceed the width
+        test_line = ' '.join(current_line + [word])
+        test_width = get_width_for_text(test_line)
+        
+        if test_width <= available_width or not current_line:  # Always add at least one word
+            current_line.append(word)
+        else:
+            # Current line is full, start a new one
+            if current_line:
+                lines.append(' '.join(current_line))
+            current_line = [word]
+    
+    # Add the last line if it has content
+    if current_line:
+        lines.append(' '.join(current_line))
+    
+    # Now draw each line
+    for line in lines:
         if "@" in line or "#" in line or contains_url(line):
-            # print("Blue text: " + line)
+            # Handle special text with links/mentions
             string_parts = line.split(" ")
             next_x = 0
             for index, part in enumerate(string_parts):

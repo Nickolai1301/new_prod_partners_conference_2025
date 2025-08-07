@@ -19,3 +19,6 @@ test_venv/
 *.venv/
 *.venv
 *cpython-313*
+
+/generated_tweets
+leaderboard.db
