@@ -20,7 +20,6 @@ if not st.session_state["main"]:
         st.session_state["team"] = selected_team
         # No rerun needed; state will update on next interaction
     st.markdown("---")
-    st.markdown("Built for the seminar competition.")
 else:
     st.title(f"Main Page - {st.session_state['team']}")
     st.markdown("Enter your prompt below and submit to see the AI response.")
@@ -48,4 +47,3 @@ else:
     else:
         st.info("Submit a prompt to see the AI response here.")
     st.markdown("---")
-    st.markdown("Built for the seminar competition.")

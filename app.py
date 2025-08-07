@@ -297,7 +297,6 @@ if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
             st.session_state["main"] = False
 
     st.markdown("---")
-    st.markdown("Built for the seminar competition.")
 
 elif st.session_state["show_leaderboard"]:
     st.title("🏆 Competition Leaderboard")
@@ -358,7 +357,6 @@ elif st.session_state["show_leaderboard"]:
     
     st.markdown("---")
     st.markdown("*Leaderboard updates in real-time during the competition*")
-    st.markdown("Built for the seminar competition.")
 
     # Button to clear leaderboard results (admin use)
     from db import clear_leaderboard
