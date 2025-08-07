@@ -1,2 +1,3 @@
-# Ignore Streamlit secrets
-.streamlit/secrets.toml
+# Ignore all TOML and env files
+*.toml
+.env

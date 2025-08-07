@@ -12,7 +12,15 @@ import pandas as pd
 load_dotenv()
 
 # Access OpenAI API key from Streamlit secrets
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+# if "OPENAI_API_KEY" in st.secrets:
+#     # Running on Streamlit Cloud or with .streamlit/secrets.toml
+#     OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+# else:
+#     # Running locally, get from .env
+#     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 client = OpenAI(api_key=OPENAI_API_KEY)
 # 
 
@@ -65,33 +73,6 @@ As a senior consultant, you've been asked to analyze the following acquisition s
 - **Key Product**: AI-powered invoice management platform
 - **Market Position**: #3 in SME invoice automation space
 
-## Key Questions to Consider:
-
-### 1. Strategic Fit Analysis
-- How does PayFlow's AI-powered platform complement TechCorp's existing digital payment solutions?
-- What synergies could be realized from this acquisition?
-
-### 2. Financial Evaluation
-- Based on the 25% growth rate, what would be a reasonable valuation range?
-- What are the key financial risks and opportunities?
-
-### 3. Integration Planning
-- What are the main integration challenges for combining two fintech platforms?
-- How would you approach cultural integration between the two teams?
-
-### 4. Market Impact
-- How would this acquisition position TechCorp against competitors?
-- What new market opportunities would this create?
-
-### 5. Risk Assessment
-- What are the top 3 risks associated with this acquisition?
-- How would you mitigate regulatory concerns in the fintech space?
-
-## Your Task
-Craft a prompt that will generate a comprehensive business case addressing these key areas. Consider how to structure your prompt to get the most insightful and actionable AI response.
-
----
-*Good luck! Remember, the best prompts are specific, structured, and provide clear context for the AI to work with.*
 """
 
 def generate_ai_response(user_prompt: str, industry: str) -> str:
@@ -127,21 +108,25 @@ Please provide a comprehensive business analysis response based on the case stud
 
 if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
     st.title("Welcome to the Competition Seminar App")
-    st.markdown("Select your team below and click 'Get Started' to begin.")
+    st.markdown("Enter your team name and select your industry below, then click 'Get Started' to begin.")
     industry_list = ["Health", "Technology", "Gas", "Finance", "Retail", "Manufacturing", "Energy"]
-    selected_team = st.selectbox("Select your industry:", industry_list)
-    
+    team_name = st.text_input("Custom Team Name:", max_chars=30, placeholder="e.g. Team_1")
+    selected_industry = st.selectbox("Select your industry:", industry_list)
+
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Get Started", type="primary", use_container_width=True):
-            st.session_state["main"] = True
-            st.session_state["team"] = selected_team
-            st.session_state["show_leaderboard"] = False
+            if not team_name.strip():
+                st.warning("Please enter a team name before starting.")
+            else:
+                st.session_state["main"] = True
+                st.session_state["team"] = f"{team_name.strip()} ({selected_industry})"
+                st.session_state["show_leaderboard"] = False
     with col2:
         if st.button("🏆 Leaderboard Page", type="secondary", use_container_width=True):
             st.session_state["show_leaderboard"] = True
             st.session_state["main"] = False
-    
+
     st.markdown("---")
     st.markdown("Built for the seminar competition.")
 
@@ -193,31 +178,34 @@ elif st.session_state["show_leaderboard"]:
 
 elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
     st.title(f"Main Page - {st.session_state['team']}")
+    st.markdown("---")
+    st.markdown(case_study_content)
+    st.markdown("---")
     
-    # Show Case Study button at the top of main page
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("📚 Show Case Study", type="secondary", use_container_width=True):
-            st.session_state["show_case_study"] = True
+    # # Show Case Study button at the top of main page
+    # col1, col2, col3 = st.columns([1, 2, 1])
+    # with col2:
+    #     if st.button("📚 Show Case Study", type="secondary", use_container_width=True):
+    #         st.session_state["show_case_study"] = True
 
-    # Case Study Modal/Popup
-    if st.session_state["show_case_study"]:
-        with st.container():
-            st.markdown("---")
-            col1, col2, col3 = st.columns([0.1, 0.8, 0.1])
-            with col2:
-                st.markdown(
-                    """
-                    <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px solid #007acc; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);'>
-                    """,
-                    unsafe_allow_html=True
-                )
-                st.markdown(case_study_content)
-                if st.button("❌ Close Case Study", type="primary"):
-                    st.session_state["show_case_study"] = False
-                    st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
-            st.markdown("---")
+    # # Case Study Modal/Popup
+    # if st.session_state["show_case_study"]:
+    #     with st.container():
+    #         st.markdown("---")
+    #         col1, col2, col3 = st.columns([0.1, 0.8, 0.1])
+    #         with col2:
+    #             st.markdown(
+    #                 """
+    #                 <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px solid #007acc; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);'>
+    #                 """,
+    #                 unsafe_allow_html=True
+    #             )
+    #             st.markdown(case_study_content)
+    #             if st.button("❌ Close Case Study", type="primary"):
+    #                 st.session_state["show_case_study"] = False
+    #                 st.rerun()
+    #             st.markdown("</div>", unsafe_allow_html=True)
+    #         st.markdown("---")
     
     st.markdown("Enter your prompt below and submit to see the AI response.")
     st.info(f"Submissions left: {st.session_state['submissions_left']}")
