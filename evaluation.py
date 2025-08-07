@@ -12,8 +12,27 @@ from dataclasses import dataclass
 # Load environment variables
 # load_dotenv()
 
-# Initialize OpenAI client
-OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+# Initialize OpenAI client - try multiple sources for API key
+def get_openai_api_key():
+    """Get OpenAI API key from multiple sources"""
+    try:
+        # Try Streamlit secrets first
+        if hasattr(st, 'secrets') and "OPENAI_API_KEY" in st.secrets:
+            return st.secrets["OPENAI_API_KEY"]
+    except Exception:
+        pass
+    
+    # Fallback to environment variable
+    api_key = os.getenv("OPENAI_API_KEY")
+    if api_key:
+        return api_key
+    
+    # If no key found, raise a clear error
+    raise ValueError("No OpenAI API key found. Please set OPENAI_API_KEY in environment variables or Streamlit secrets.")
+
+# Get the API key safely
+OPENAI_API_KEY = get_openai_api_key()
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 @dataclass
 class PromptEvaluation:
@@ -30,7 +49,7 @@ class PromptEvaluation:
 class PromptEvaluator:
     """Class to evaluate prompts using LLM"""
     
-    def __init__(self, model: str = "gpt-4"):
+    def __init__(self, model: str = "gpt-4.1-mini-2025-04-14"):
         self.model = model
         self.evaluation_criteria = {
             "clarity": "How clear and understandable is the prompt?",
@@ -108,8 +127,8 @@ Remember: Frame all feedback positively and encouragingly! Focus on business con
                     {"role": "system", "content": "You are an expert prompt evaluator. Provide detailed, constructive feedback in valid JSON format only."},
                     {"role": "user", "content": evaluation_prompt}
                 ],
-                temperature=0.3,  # Lower temperature for more consistent evaluation
-                max_tokens=1500
+                temperature=0.3 # Lower temperature for more consistent evaluation
+
             )
             
             result_text = response.choices[0].message.content.strip()

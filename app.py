@@ -116,7 +116,7 @@ Structure your analysis professionally with logical sections and clear formattin
                 {"role": "user", "content": full_context}
             ],
             temperature=0.7,
-            max_tokens=2000,
+            max_tokens=15000,
             stream=True
         )
         
