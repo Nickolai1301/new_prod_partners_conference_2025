@@ -1,3 +1,7 @@
+def clear_leaderboard():
+    with closing(sqlite3.connect(DB_PATH)) as conn:
+        with conn:
+            conn.execute('DELETE FROM leaderboard')
 import sqlite3
 from contextlib import closing
 
