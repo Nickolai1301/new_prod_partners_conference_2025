@@ -224,20 +224,6 @@ def create_leaderboard_html(df):
 # Display the custom HTML table
 st.html(create_leaderboard_html(df))
 
-# # Summary stats
-# col1, col2 = st.columns(2)
-# with col1:
-#     st.metric("Total Teams", len(df))
-# with col2:
-#     # Convert Score column to numeric, replacing empty strings with NaN
-#     numeric_scores = pd.to_numeric(df['Score'], errors='coerce')
-#     # Calculate mean only if there are valid scores
-#     if numeric_scores.notna().any():
-#         avg_score = numeric_scores.mean()
-#         st.metric("Average Score", f"{avg_score:.0f}")
-#     else:
-#         st.metric("Average Score", "0")
-
 # Recent Tweet Images Section
 st.markdown("---")
 st.markdown("### 🐦 Recent Agent Lee Tweets")

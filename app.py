@@ -155,24 +155,24 @@ def generate_trump_tweet(score: float, ai_response: str, team_name: str) -> str:
     """Generate a Trump-style tweet based on the evaluation score and AI response"""
     try:
         # Load Trump prompt style from file
-        with open("trump_prompt.txt", "r", encoding="utf-8") as file:
-            trump_style_prompt = file.read()
+        with open("trump_tweets.txt", "r", encoding="utf-8") as file:
+            trump_tweets = file.read()
 
         # Create the prompt for generating Trump tweet
         tweet_prompt = f"""
-{trump_style_prompt}
+
 
 You are Donald Trump commenting on a business prompt competition where teams submit prompts and get scored. 
 
 CONTEXT:
 - Team: {team_name}
 - Their prompt got a score of {score:.1f}/100
-- The AI generated this response: {ai_response[:500]}...
+- The AI generated this response: {ai_response}...
 
 Generate a single Trump-style tweet (max 280 characters) that:
 1. Comments on their score and performance 
 2. Uses Trump's signature style (ALL CAPS for emphasis, exclamation points, superlatives)
-3. Be either congratulatory (if score >= 80), mildly critical (60-79), or harsh (below 60)
+3. Is CONGRATULATORY if score ≥ 90, or *EXTREMELY CRITICAL* if score < 90
 4. Keep it business/competition focused
 5. Make it authentic to Trump's tweeting style
 
@@ -181,6 +181,10 @@ IMPORTANT:
 - Stay under 280 characters
 - Use Trump's signature phrases and style
 - Be entertaining but not offensive
+
+ACTUAL TRUMP TWEET EXAMPLES FOR TONE AND STYLE REFERENCE:
+{trump_tweets}
+
 """
 
         response = client.chat.completions.create(
@@ -192,8 +196,7 @@ IMPORTANT:
                 },
                 {"role": "user", "content": tweet_prompt},
             ],
-            temperature=0.8,
-            max_tokens=100,
+            temperature=0.8
         )
 
         tweet = response.choices[0].message.content.strip()
