@@ -1,3 +1,4 @@
+
 import streamlit as st
 from evaluation import PromptEvaluator
 from openai import OpenAI
@@ -7,6 +8,7 @@ import sys
 from io import StringIO
 import contextlib
 import pandas as pd
+from db import init_db, update_team_score, get_leaderboard
 
 # Load environment variables
 load_dotenv()
@@ -46,9 +48,11 @@ if "last_evaluation" not in st.session_state:
     st.session_state["last_evaluation"] = None
 if "last_ai_response" not in st.session_state:
     st.session_state["last_ai_response"] = None
-if "team_scores" not in st.session_state:
-    # Dict: team_name -> highest score
-    st.session_state["team_scores"] = {}
+
+# Initialize the SQLite database (only once)
+if "db_initialized" not in st.session_state:
+    init_db()
+    st.session_state["db_initialized"] = True
 
 # Case Study Demo Content
 case_study_content = """
@@ -86,7 +90,7 @@ Please provide a comprehensive business analysis response based on the case stud
 """
         
         response = client.chat.completions.create(
-            model="o4-mini-2025-04-16",
+            model="gpt-4.1-mini-2025-04-14",
             messages=[
                 {"role": "system", "content": "You are a senior M&A consultant providing expert analysis. Use the case study context to inform your response and provide detailed, actionable business insights."},
                 {"role": "user", "content": full_context}
@@ -127,35 +131,32 @@ if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
 elif st.session_state["show_leaderboard"]:
     st.title("🏆 Competition Leaderboard")
     st.markdown("### Current standings for all teams across industries")
-    
+
     # Back button
     if st.button("← Back to Home", type="secondary"):
         st.session_state["show_leaderboard"] = False
         st.session_state["main"] = False
         st.rerun()
-    
+
     st.markdown("---")
-    
-    # Display leaderboard
-    import pandas as pd
-    team_scores = st.session_state["team_scores"]
+
+    # Fetch leaderboard from SQLite DB
+    leaderboard = get_leaderboard()
     leaderboard_rows = [
-        {"Team": team, "Best Score": score}
-        for team, score in team_scores.items()
+        {"Team": row[0], "Best Score": row[1], "Last Submission": row[2]} for row in leaderboard
     ]
-    leaderboard_rows = sorted(leaderboard_rows, key=lambda x: x["Best Score"], reverse=True)
     df = pd.DataFrame(leaderboard_rows)
     st.dataframe(df, use_container_width=True, height=400)
-    
+
     # Summary stats
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Total Teams", len(df))
     with col2:
-        st.metric("Total Submissions", df["Submissions"].sum())
+        st.metric("Average Score", f"{df['Best Score'].mean():.0f}" if not df.empty else "0")
     with col3:
-        st.metric("Average Score", f"{df['Score'].mean():.0f}")
-    
+        st.metric("Most Recent Submission", str(df['Last Submission'].max()) if not df.empty else "-")
+
     st.markdown("---")
     st.markdown("*Leaderboard updates in real-time during the competition*")
     st.markdown("Built for the seminar competition.")
@@ -303,14 +304,11 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                 else:
                     st.error("⚠️ Evaluation failed. Please try again.")
             
-            # Update team_scores with highest score for this team
+            # Update leaderboard in SQLite DB with highest score for this team
             if evaluation:
                 team_name = st.session_state["team"]
                 score = evaluation.overall_score
-                team_scores = st.session_state["team_scores"]
-                if team_name not in team_scores or score > team_scores[team_name]:
-                    team_scores[team_name] = score
-                st.session_state["team_scores"] = team_scores
+                update_team_score(team_name, score)
     elif submit_disabled:
         st.warning("No more submissions available.")
     else:
