@@ -10,6 +10,8 @@ import contextlib
 import pandas as pd
 from db import init_db, update_team_score, get_leaderboard
 
+
+
 # Import tweet generator function with error handling
 try:
     import sys
@@ -25,9 +27,7 @@ except ImportError as e:
 
 from datetime import datetime
 
-import streamlit as st
-from streamlit_autorefresh import st_autorefresh
-st_autorefresh(interval=2000, limit=100, key="fizzbuzzcounter")
+
 
 
 
@@ -58,8 +58,6 @@ if "submissions_left" not in st.session_state:
     st.session_state["submissions_left"] = 3
 if "show_case_study" not in st.session_state:
     st.session_state["show_case_study"] = False
-if "show_leaderboard" not in st.session_state:
-    st.session_state["show_leaderboard"] = False
 if "evaluator" not in st.session_state:
     st.session_state["evaluator"] = PromptEvaluator()
 if "terminal_output" not in st.session_state:
@@ -70,16 +68,6 @@ if "last_ai_response" not in st.session_state:
     st.session_state["last_ai_response"] = None
 if "last_trump_tweet" not in st.session_state:
     st.session_state["last_trump_tweet"] = None
-if "leaderboard_data" not in st.session_state:
-    st.session_state["leaderboard_data"] = [
-        {
-            "Rank": 1,
-            "Team": "Alpha Consultants",
-            "Industry": "Technology",
-            "Score": 2450,
-            "Submissions": 8,
-        }
-    ]
 
 # Initialize the SQLite database (only once)
 if "db_initialized" not in st.session_state:
@@ -225,7 +213,7 @@ IMPORTANT:
             return f"{team_name} got {score:.0f} points. SAD! Need to work harder. Much harder! #LosingBigly"
 
 
-if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
+if not st.session_state["main"]:
     st.title("🎯 Welcome to the Prompt-Off: The Battle for Budget! 💥")
 
     # Homepage content
@@ -328,121 +316,10 @@ if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
             else:
                 st.session_state["main"] = True
                 st.session_state["team"] = f"{team_name.strip()} ({selected_industry})"
-                st.session_state["show_leaderboard"] = False
-    with col2:
-        if st.button("🏆 Leaderboard Page", type="secondary", use_container_width=True):
-            st.session_state["show_leaderboard"] = True
-            st.session_state["main"] = False
 
     st.markdown("---")
 
-elif st.session_state["show_leaderboard"]:
-    import time
-    st.title("🏆 Competition Leaderboard")
-    st.markdown("### Current standings for all teams across industries")
-
-
-    # # Auto-refresh every 1 second
-    # refresh_placeholder = st.empty()
-    # if "_leaderboard_last_refresh" not in st.session_state:
-    #     st.session_state["_leaderboard_last_refresh"] = time.time()
-    # if time.time() - st.session_state["_leaderboard_last_refresh"] > 1:
-    #     st.session_state["_leaderboard_last_refresh"] = time.time()
-    #     st.rerun()
-    # else:
-    #     refresh_placeholder.markdown("<span style='display:none'></span>", unsafe_allow_html=True)
-    #     time.sleep(0.1)
-
-    # Polling interval in seconds
-    # poll_interval = 10
-    
-    # # Store last update timestamp in session state
-    # if "last_update" not in st.session_state:
-    #     st.session_state.last_update = time.time()
-    
-    # # Refresh logic
-    # if time.time() - st.session_state.last_update > poll_interval:
-    #     st.session_state.last_update = time.time()
-    #     st.rerun()
-
-
-
-
-    # Manual refresh button
-    if st.button("🔄 Refresh Leaderboard"):
-        st.rerun()
-
-    # Back button
-    if st.button("← Back to Home", type="secondary"):
-        st.session_state["show_leaderboard"] = False
-        st.session_state["main"] = False
-        st.rerun()
-
-    st.markdown("---")
-
-    # Fetch leaderboard from SQLite DB
-    leaderboard = get_leaderboard()
-
-    if leaderboard:
-        # Use real data from database
-        leaderboard_rows = [
-            {
-                "Team": row[0],
-                "Score": row[1],
-                "Last Submission": row[2],
-                "Submissions": 1,
-            }
-            for row in leaderboard
-        ]
-        df = pd.DataFrame(leaderboard_rows)
-    else:
-        # Fallback to demo data if no real data exists
-        df = pd.DataFrame(st.session_state["leaderboard_data"])
-        # Remove Rank column as it's not needed for display
-        if "Rank" in df.columns:
-            df = df.drop("Rank", axis=1)
-
-    # Create a styled dataframe
-    st.markdown("#### 📊 Team Rankings")
-
-    # Highlight top 3 teams
-    def highlight_top_teams(row):
-        if row.name == 0:  # First place
-            return ["background-color: #FFD700; font-weight: bold"] * len(row)  # Gold
-        elif row.name == 1:  # Second place
-            return ["background-color: #C0C0C0; font-weight: bold"] * len(row)  # Silver
-        elif row.name == 2:  # Third place
-            return ["background-color: #CD7F32; font-weight: bold"] * len(row)  # Bronze
-        else:
-            return [""] * len(row)
-
-    styled_df = df.style.apply(highlight_top_teams, axis=1)
-    st.dataframe(styled_df, use_container_width=True, height=400)
-
-    # Summary stats
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total Teams", len(df))
-    with col2:
-        if "Submissions" in df.columns:
-            st.metric("Total Submissions", df["Submissions"].sum())
-        else:
-            st.metric("Total Submissions", "N/A")
-    with col3:
-        st.metric("Average Score", f"{df['Score'].mean():.0f}" if not df.empty else "0")
-
-    st.markdown("---")
-    st.markdown("*Leaderboard updates in real-time during the competition*")
-
-    # Button to clear leaderboard results (admin use)
-    from db import clear_leaderboard
-
-    if st.button("🗑️ Clear Leaderboard (Admin)", type="secondary"):
-        clear_leaderboard()
-        st.success("Leaderboard cleared!")
-        st.rerun()
-
-elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
+elif st.session_state["main"]:
     st.title(f"PROMPT ARENA - {st.session_state['team']}")
     st.markdown("---")
     st.markdown(case_study_content)
