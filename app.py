@@ -76,8 +76,8 @@ As a senior consultant, you've been asked to analyze the following acquisition s
 
 """
 
-def generate_ai_response(user_prompt: str, industry: str) -> str:
-    """Generate AI response using the case study context and user prompt"""
+def generate_ai_response_streaming(user_prompt: str, industry: str, placeholder):
+    """Generate AI response using streaming with structured markdown output"""
     try:
         # Combine case study with user prompt for context
         full_context = f"""
@@ -90,22 +90,46 @@ USER PROMPT:
 INDUSTRY CONTEXT: {industry}
 
 Please provide a comprehensive business analysis response based on the case study context and the user's specific prompt above. Focus on actionable insights and professional recommendations suitable for a consulting environment.
+
+IMPORTANT: Format your response as well-structured markdown with clear headings, bullet points, and sections. Use proper markdown syntax including:
+- # for main headings
+- ## for subheadings  
+- ### for sub-subheadings
+- * or - for bullet points
+- **bold** for emphasis
+- Tables where appropriate
+- Clear paragraph breaks
+
+Structure your analysis professionally with logical sections and clear formatting.
 """
         
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+        stream = client.chat.completions.create(
+            model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a senior M&A consultant providing expert analysis. Use the case study context to inform your response and provide detailed, actionable business insights."},
+                {"role": "system", "content": "You are a senior M&A consultant providing expert analysis. Use the case study context to inform your response and provide detailed, actionable business insights. Always format your response as well-structured markdown with clear headings, bullet points, and professional formatting."},
                 {"role": "user", "content": full_context}
             ],
             temperature=0.7,
-            max_tokens=1500
+            max_tokens=2000,
+            stream=True
         )
         
-        return response.choices[0].message.content.strip()
+        # Stream the response
+        full_response = ""
+        for chunk in stream:
+            if chunk.choices[0].delta.content is not None:
+                chunk_text = chunk.choices[0].delta.content
+                full_response += chunk_text
+                placeholder.markdown(full_response + "▌")  # Show cursor while streaming
+        
+        # Final update without cursor
+        placeholder.markdown(full_response)
+        return full_response
         
     except Exception as e:
-        return f"Error generating AI response: {str(e)}"
+        error_msg = f"**Error generating AI response:** {str(e)}"
+        placeholder.markdown(error_msg)
+        return error_msg
 
 if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
     st.title("Welcome to the Competition Seminar App")
@@ -234,18 +258,23 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     sys.stdout = stdout_backup
                     sys.stderr = stderr_backup
             
-            # Step 1: Generate AI response using case study + user prompt
-            with st.spinner("🤖 Generating AI response based on case study..."):
-                with capture_terminal_output() as (stdout_capture, stderr_capture):
-                    ai_response = generate_ai_response(user_prompt, st.session_state["team"])
-                
-                # Store AI response
-                st.session_state["last_ai_response"] = ai_response
-                
-                # Capture terminal output from AI generation
-                terminal_output = stdout_capture.getvalue() + stderr_capture.getvalue()
-                if terminal_output.strip():
-                    st.session_state["terminal_output"].append(f"[AI Generation] {terminal_output.strip()}")
+            # Step 1: Generate AI response using case study + user prompt with streaming
+            st.markdown("### 🤖 AI Response")
+            st.markdown("*Based on the case study context and your prompt:*")
+            
+            # Create placeholder for streaming response
+            response_placeholder = st.empty()
+            
+            with capture_terminal_output() as (stdout_capture, stderr_capture):
+                ai_response = generate_ai_response_streaming(user_prompt, st.session_state["team"], response_placeholder)
+            
+            # Store AI response
+            st.session_state["last_ai_response"] = ai_response
+            
+            # Capture terminal output from AI generation
+            terminal_output = stdout_capture.getvalue() + stderr_capture.getvalue()
+            if terminal_output.strip():
+                st.session_state["terminal_output"].append(f"[AI Generation] {terminal_output.strip()}")
             
             # Step 2: Evaluate the original user prompt (not the AI response)
             with st.spinner("📊 Evaluating your prompt quality..."):
@@ -263,33 +292,16 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                 if terminal_output.strip():
                     st.session_state["terminal_output"].append(f"[Prompt Evaluation] {terminal_output.strip()}")
             
-            # Display results
-            st.success("✅ AI response generated and prompt evaluated!")
+            # Display evaluation results in sidebar or below
+            st.markdown("---")
+            st.markdown("### 📊 Prompt Evaluation")
+            st.markdown("*Quality assessment of your original prompt:*")
             
-            # Create two columns for AI response and evaluation
-            col1, col2 = st.columns([1, 1])
-            
-            with col1:
-                st.markdown("### 🤖 AI Response")
-                st.markdown("*Based on the case study context and your prompt:*")
+            if evaluation:
+                # Create columns for evaluation display
+                col1, col2 = st.columns([1, 1])
                 
-                if ai_response and not ai_response.startswith("Error"):
-                    st.markdown(
-                        f"""
-                        <div style='min-height:250px;overflow-y:auto;overflow-x:hidden;padding:15px;background:#23292e;border-radius:8px;border-left:4px solid #007acc;'>
-                        <div style='white-space:pre-wrap;line-height:1.6;color:#ffffff;'>{ai_response}</div>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-                else:
-                    st.error(f"⚠️ {ai_response}")
-            
-            with col2:
-                st.markdown("### 📊 Prompt Evaluation")
-                st.markdown("*Quality assessment of your original prompt:*")
-                
-                if evaluation:
+                with col1:
                     # Overall score with color coding
                     score_color = "#28a745" if evaluation.overall_score >= 80 else "#ffc107" if evaluation.overall_score >= 60 else "#dc3545"
                     st.markdown(
@@ -311,7 +323,8 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     }
                     df_scores = pd.DataFrame(score_data)
                     st.dataframe(df_scores, use_container_width=True, hide_index=True)
-                    
+                
+                with col2:
                     # Feedback
                     st.markdown("**💭 AI Feedback:**")
                     st.info(evaluation.feedback)
@@ -324,8 +337,8 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     with st.expander("🔧 Areas for Improvement"):
                         for improvement in evaluation.improvements:
                             st.write(f"• {improvement}")
-                else:
-                    st.error("⚠️ Evaluation failed. Please try again.")
+            else:
+                st.error("⚠️ Evaluation failed. Please try again.")
             
             # Show original prompt for reference
             st.markdown("---")
