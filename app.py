@@ -247,6 +247,13 @@ elif st.session_state["show_leaderboard"]:
     st.markdown("*Leaderboard updates in real-time during the competition*")
     st.markdown("Built for the seminar competition.")
 
+    # Button to clear leaderboard results (admin use)
+    from db import clear_leaderboard
+    if st.button("🗑️ Clear Leaderboard (Admin)", type="secondary"):
+        clear_leaderboard()
+        st.success("Leaderboard cleared!")
+        st.rerun()
+
 elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
     st.title(f"Main Page - {st.session_state['team']}")
     st.markdown("---")
