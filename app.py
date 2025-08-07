@@ -46,16 +46,9 @@ if "last_evaluation" not in st.session_state:
     st.session_state["last_evaluation"] = None
 if "last_ai_response" not in st.session_state:
     st.session_state["last_ai_response"] = None
-if "leaderboard_data" not in st.session_state:
-    st.session_state["leaderboard_data"] = [
-        {"Rank": 1, "Team": "Alpha Consultants", "Industry": "Technology", "Score": 2450, "Submissions": 8},
-        {"Rank": 2, "Team": "Beta Analytics", "Industry": "Finance", "Score": 2380, "Submissions": 7},
-        {"Rank": 3, "Team": "Gamma Solutions", "Industry": "Health", "Score": 2290, "Submissions": 6},
-        {"Rank": 4, "Team": "Delta Advisors", "Industry": "Energy", "Score": 2150, "Submissions": 5},
-        {"Rank": 5, "Team": "Epsilon Group", "Industry": "Retail", "Score": 2050, "Submissions": 4},
-        {"Rank": 6, "Team": "Zeta Partners", "Industry": "Manufacturing", "Score": 1980, "Submissions": 4},
-        {"Rank": 7, "Team": "Theta Corp", "Industry": "Gas", "Score": 1890, "Submissions": 3}
-    ]
+if "team_scores" not in st.session_state:
+    # Dict: team_name -> highest score
+    st.session_state["team_scores"] = {}
 
 # Case Study Demo Content
 case_study_content = """
@@ -93,7 +86,7 @@ Please provide a comprehensive business analysis response based on the case stud
 """
         
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="o4-mini-2025-04-16",
             messages=[
                 {"role": "system", "content": "You are a senior M&A consultant providing expert analysis. Use the case study context to inform your response and provide detailed, actionable business insights."},
                 {"role": "user", "content": full_context}
@@ -145,24 +138,14 @@ elif st.session_state["show_leaderboard"]:
     
     # Display leaderboard
     import pandas as pd
-    df = pd.DataFrame(st.session_state["leaderboard_data"])
-    
-    # Create a styled dataframe
-    st.markdown("#### 📊 Team Rankings")
-    
-    # Highlight top 3 teams
-    def highlight_top_teams(row):
-        if row.name == 0:  # First place
-            return ['background-color: #FFD700; font-weight: bold'] * len(row)  # Gold
-        elif row.name == 1:  # Second place
-            return ['background-color: #C0C0C0; font-weight: bold'] * len(row)  # Silver
-        elif row.name == 2:  # Third place
-            return ['background-color: #CD7F32; font-weight: bold'] * len(row)  # Bronze
-        else:
-            return [''] * len(row)
-    
-    styled_df = df.style.apply(highlight_top_teams, axis=1)
-    st.dataframe(styled_df, use_container_width=True, height=400)
+    team_scores = st.session_state["team_scores"]
+    leaderboard_rows = [
+        {"Team": team, "Best Score": score}
+        for team, score in team_scores.items()
+    ]
+    leaderboard_rows = sorted(leaderboard_rows, key=lambda x: x["Best Score"], reverse=True)
+    df = pd.DataFrame(leaderboard_rows)
+    st.dataframe(df, use_container_width=True, height=400)
     
     # Summary stats
     col1, col2, col3 = st.columns(3)
@@ -320,7 +303,14 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                 else:
                     st.error("⚠️ Evaluation failed. Please try again.")
             
-            # ...removed System Activity and Your Original Prompt sections...
+            # Update team_scores with highest score for this team
+            if evaluation:
+                team_name = st.session_state["team"]
+                score = evaluation.overall_score
+                team_scores = st.session_state["team_scores"]
+                if team_name not in team_scores or score > team_scores[team_name]:
+                    team_scores[team_name] = score
+                st.session_state["team_scores"] = team_scores
     elif submit_disabled:
         st.warning("No more submissions available.")
     else:

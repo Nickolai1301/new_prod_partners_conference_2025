@@ -32,8 +32,13 @@ class PromptEvaluator:
     
     def __init__(self, model: str = "gpt-4"):
         self.model = model
-        # Load evaluation criteria from rubric.txt
-        self.evaluation_criteria = self._load_rubric()
+        # Evaluation criteria based on business case rubric
+        self.evaluation_criteria = {
+            "strategic_fit_objectives": "Strategic Fit & Objectives",
+            "audience_relationships": "Audience & Relationships",
+            "commercials_resourcing": "Commercials & Resourcing",
+            "outcomes_measurement_activation": "Outcomes, Measurement & Activation"
+        }
         self.feedback_tone = self._load_feedback_tone()
     
     def _load_feedback_tone(self) -> str:
@@ -46,60 +51,40 @@ class PromptEvaluator:
             return """Be encouraging and positive while providing constructive feedback. 
                      Focus on strengths and frame improvements as opportunities for growth."""
     
-    def _load_rubric(self) -> dict[str, str]:
-        """Load evaluation criteria from rubric.txt file"""
-        rubric: dict[str, str] = {}
-        try:
-            with open("rubric.txt", "r", encoding="utf-8") as file:
-                for line in file:
-                    if ":" in line:
-                        key, val = line.strip().split(":", 1)
-                        rubric[key.strip()] = val.strip()
-        except FileNotFoundError:
-            # Fallback to default criteria if rubric.txt is missing
-            rubric = {
-                "clarity": "How clear and understandable is the prompt?",
-                "specificity": "How specific and detailed are the requirements?",
-                "context": "How well does the prompt provide necessary context?",
-                "structure": "How well-structured and organized is the prompt?"
-            }
-        return rubric
-    
     def create_evaluation_prompt(self, user_prompt: str, industry: str = None) -> str:
-        """Create a system prompt for evaluating AI-generated outputs in a savage Trump style"""
+        """Create a system prompt for evaluating AI-generated outputs based on the business case rubric"""
         
+        # Load rubric text
+        try:
+            rubric_text = open("rubric.txt", "r", encoding="utf-8").read()
+        except FileNotFoundError:
+            rubric_text = "(Rubric not found)"
+
         evaluation_prompt = f"""
 {self.feedback_tone}
 
-You are a savage Trump-style prompt evaluator, ruthlessly insulting mediocrity and sparing praise only when absolutely deserved.
+Use this Business Case Evaluation Rubric. Rate every section as Weak, justify with brutal insults:
 
-Please evaluate the following AI-generated output based on these criteria:
-
-1. **Clarity (25%)**: How clear and understandable is the output? Is it easy to follow?
-2. **Specificity (25%)**: How specific and detailed are the provided answers? Does it address concrete deliverables?
-3. **Context (25%)**: How well does the output provide necessary context for analysis?
-4. **Structure (25%)**: How well-organized is the output? Does it follow a logical flow?
+{rubric_text}
 
 AI OUTPUT TO EVALUATE:
 ```
 {user_prompt}
 ```
 
-{f"INDUSTRY CONTEXT: {industry}" if industry else ""}
+{'INDUSTRY CONTEXT: ' + industry if industry else ''}
 
-Please provide your evaluation in the following JSON format, using the savage Trump style throughout (do not give high scores easily; most outputs should earn low scores):
-{{
-    "overall_score": <float 0-100>,
-    "clarity_score": <float 0-100>,
-    "specificity_score": <float 0-100>, 
-    "context_score": <float 0-100>,
-    "structure_score": <float 0-100>,
-    "feedback": "<encouraging overall feedback paragraph using the cheerful tone>",
-    "strengths": ["<positive strength 1>", "<positive strength 2>", "<positive strength 3>"],
-    "improvements": ["<encouraging improvement 1>", "<encouraging improvement 2>", "<encouraging improvement 3>"]
-}}
+Respond with JSON only, using these keys:
+  "strategic_fit_objectives": "Strong" or "Weak",
+  "strategic_fit_objectives_justification": "...your insult...",
+  "audience_relationships": "Strong" or "Weak",
+  "audience_relationships_justification": "...your insult...",
+  "commercials_resourcing": "Strong" or "Weak",
+  "commercials_resourcing_justification": "...your insult...",
+  "outcomes_measurement_activation": "Strong" or "Weak",
+  "outcomes_measurement_activation_justification": "...your insult..."
 
-Remember: Humiliate laziness, demand excellence, and spare no insults. Praise only if it’s truly exceptional."
+This is an EXTREMELY harsh marker; High scores <95 are pathetic. Output valid JSON only.
 """
         return evaluation_prompt
     
@@ -135,14 +120,19 @@ Remember: Humiliate laziness, demand excellence, and spare no insults. Praise on
                 result = json.loads(result_text)
                 
                 return PromptEvaluation(
-                    overall_score=float(result.get("overall_score", 0)),
-                    clarity_score=float(result.get("clarity_score", 0)),
-                    specificity_score=float(result.get("specificity_score", 0)),
-                    context_score=float(result.get("context_score", 0)),
-                    structure_score=float(result.get("structure_score", 0)),
-                    feedback=result.get("feedback", ""),
-                    strengths=result.get("strengths", []),
-                    improvements=result.get("improvements", [])
+                    overall_score=0.0,  # Not used for rubric criteria, set to 0 or compute if needed
+                    clarity_score=0.0,  # Not used for rubric criteria, set to 0 or compute if needed
+                    specificity_score=0.0,  # Not used for rubric criteria, set to 0 or compute if needed
+                    context_score=0.0,  # Not used for rubric criteria, set to 0 or compute if needed
+                    structure_score=0.0,  # Not used for rubric criteria, set to 0 or compute if needed
+                    feedback="",
+                    strengths=[
+                        f"Strategic Fit & Objectives: {result.get('strategic_fit_objectives', '')} - {result.get('strategic_fit_objectives_justification', '')}",
+                        f"Audience & Relationships: {result.get('audience_relationships', '')} - {result.get('audience_relationships_justification', '')}",
+                        f"Commercials & Resourcing: {result.get('commercials_resourcing', '')} - {result.get('commercials_resourcing_justification', '')}",
+                        f"Outcomes, Measurement & Activation: {result.get('outcomes_measurement_activation', '')} - {result.get('outcomes_measurement_activation_justification', '')}"
+                    ],
+                    improvements=[]  # You can parse improvements if you want to add more logic
                 )
             except json.JSONDecodeError:
                 # Fallback parsing if JSON is malformed
@@ -154,15 +144,16 @@ Remember: Humiliate laziness, demand excellence, and spare no insults. Praise on
     
     def _parse_fallback_response(self, response_text: str) -> PromptEvaluation:
         """Fallback method to parse response if JSON parsing fails"""
+        # Fallback returns brutal default scores
         return PromptEvaluation(
-            overall_score=70.0,  # Default score
-            clarity_score=70.0,
-            specificity_score=70.0,
-            context_score=70.0,
-            structure_score=70.0,
-            feedback="Evaluation completed with limited parsing. Please check prompt formatting.",
-            strengths=["Prompt submitted successfully"],
-            improvements=["Consider more specific requirements", "Add more context", "Improve structure"]
+            overall_score=10.0,
+            clarity_score=10.0,
+            specificity_score=10.0,
+            context_score=10.0,
+            structure_score=10.0,
+            feedback="This fallback evaluation is a disaster. You couldn't even parse JSON correctly. Pathetic.",
+            strengths=["Maybe you typed something correctly?"],
+            improvements=["Learn to format JSON.", "Try copying a tutorial.", "Seriously, this is embarrassing."]
         )
     
     def batch_evaluate_prompts(self, prompts: List[Dict]) -> List[Dict]:
@@ -195,16 +186,11 @@ Remember: Humiliate laziness, demand excellence, and spare no insults. Praise on
     
     def get_score_interpretation(self, score: float) -> str:
         """Get interpretation of score"""
-        if score >= 90:
-            return "Excellent - Professional quality prompt"
-        elif score >= 80:
-            return "Very Good - Strong prompt with minor improvements needed"
-        elif score >= 70:
-            return "Good - Solid prompt, some enhancements would help"
-        elif score >= 60:
-            return "Fair - Decent foundation, needs significant improvement"
+        # Only near-perfect scores pass; everything else is unacceptable
+        if score >= 95:
+            return "Excellent - This is barely acceptable. You're not completely useless."
         else:
-            return "Needs Work - Major improvements required"
+            return "Needs Work - This is pathetic. Do better or go home."
 
 def demo_evaluation():
     """Demo function to test the evaluation system"""
@@ -253,10 +239,10 @@ def demo_evaluation():
         if evaluation:
             print(f"\n📊 RESULTS:")
             print(f"Overall Score: {evaluation.overall_score:.1f}/100 - {evaluator.get_score_interpretation(evaluation.overall_score)}")
-            print(f"Clarity: {evaluation.clarity_score:.1f}")
-            print(f"Specificity: {evaluation.specificity_score:.1f}")
-            print(f"Context: {evaluation.context_score:.1f}")
-            print(f"Structure: {evaluation.structure_score:.1f}")
+            print(f"Strategic Fit & Objectives: {evaluation.strengths[0]}")
+            print(f"Audience & Relationships: {evaluation.strengths[1]}")
+            print(f"Commercials & Resourcing: {evaluation.strengths[2]}")
+            print(f"Outcomes, Measurement & Activation: {evaluation.strengths[3]}")
             
             print(f"\n💬 Feedback: {evaluation.feedback}")
             
