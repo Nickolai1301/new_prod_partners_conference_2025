@@ -1,4 +1,3 @@
-
 import streamlit as st
 from evaluation import PromptEvaluator
 from openai import OpenAI
@@ -25,7 +24,6 @@ load_dotenv()
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
 client = OpenAI(api_key=OPENAI_API_KEY)
-# test
 
 st.set_page_config(page_title="Competition Team App", page_icon="🤖", layout="wide")
 
@@ -48,11 +46,22 @@ if "last_evaluation" not in st.session_state:
     st.session_state["last_evaluation"] = None
 if "last_ai_response" not in st.session_state:
     st.session_state["last_ai_response"] = None
+if "leaderboard_data" not in st.session_state:
+    st.session_state["leaderboard_data"] = [
+        {"Rank": 1, "Team": "Alpha Consultants", "Industry": "Technology", "Score": 2450, "Submissions": 8},
+        {"Rank": 2, "Team": "Beta Analytics", "Industry": "Finance", "Score": 2380, "Submissions": 7},
+        {"Rank": 3, "Team": "Gamma Solutions", "Industry": "Health", "Score": 2290, "Submissions": 6},
+        {"Rank": 4, "Team": "Delta Advisors", "Industry": "Energy", "Score": 2150, "Submissions": 5},
+        {"Rank": 5, "Team": "Epsilon Group", "Industry": "Retail", "Score": 2050, "Submissions": 4},
+        {"Rank": 6, "Team": "Zeta Partners", "Industry": "Manufacturing", "Score": 1980, "Submissions": 4},
+        {"Rank": 7, "Team": "Theta Corp", "Industry": "Gas", "Score": 1890, "Submissions": 3}
+    ]
 
 # Initialize the SQLite database (only once)
 if "db_initialized" not in st.session_state:
     init_db()
     st.session_state["db_initialized"] = True
+
 
 # Case Study Demo Content
 case_study_content = """
@@ -87,10 +96,6 @@ USER PROMPT:
 INDUSTRY CONTEXT: {industry}
 
 Please provide a comprehensive business analysis response based on the case study context and the user's specific prompt above. Focus on actionable insights and professional recommendations suitable for a consulting environment.
-"""
-        
-        response = client.chat.completions.create(
-            model="gpt-4.1-mini-2025-04-14",
 
 IMPORTANT: Format your response as well-structured markdown with clear headings, bullet points, and sections. Use proper markdown syntax including:
 - # for main headings
@@ -135,92 +140,92 @@ Structure your analysis professionally with logical sections and clear formattin
 if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
     st.title("🎯 Welcome to the Prompt-Off: The Battle for Budget! 💥")
 
-
-    # Insert homepage.txt content here, formatted for Streamlit
+    # Homepage content
     homepage_content = """
-<p>Think your industry group deserves a bigger slice of the pie? Ready to make the case for why your team should get extra investment from leadership?</p>
-<p>Here’s your chance to prove it—<b>prompt-style</b>.</p>
+                <p>Think your industry group deserves a bigger slice of the pie? Ready to make the case for why your team should get extra investment from leadership?</p>
+                <p>Here’s your chance to prove it—<b>prompt-style</b>.</p>
 
-<div style='margin-bottom:1em;'></div>
-<h3 style='margin-bottom:0.2em;'>What is this?</h3>
-<ul>
-  <li>This is no ordinary pitch session. It’s a competitive, high-stakes, slightly sassy prompt showdown.</li>
-  <li>Battle it out with your fellow Partners to craft the <b>strongest business case</b> for additional funding.</li>
-</ul>
+                <div style='margin-bottom:1em;'></div>
+                <h3 style='margin-bottom:0.2em;'>What is this?</h3>
+                <ul>
+                <li>This is no ordinary pitch session. It’s a competitive, high-stakes, slightly sassy prompt showdown.</li>
+                <li>Battle it out with your fellow Partners to craft the <b>strongest business case</b> for additional funding.</li>
+                </ul>
 
-<h3 style='margin-bottom:0.2em;'>🔄 The Format</h3>
-<ul>
-  <li><b>Three chances</b> to write your business case prompt.</li>
-  <li>After each of your first two submissions, you’ll receive <b>sassy, unfiltered feedback</b> to sharpen your thinking.</li>
-  <li>On the third round, you’ll submit your <b>final prompt</b>—the one that hits the mark.</li>
-</ul>
+                <h3 style='margin-bottom:0.2em;'>🔄 The Format</h3>
+                <ul>
+                <li><b>Three chances</b> to write your business case prompt.</li>
+                <li>After each of your first two submissions, you’ll receive <b>sassy, unfiltered feedback</b> to sharpen your thinking.</li>
+                <li>On the third round, you’ll submit your <b>final prompt</b>—the one that hits the mark.</li>
+                </ul>
 
-<h3 style='margin-bottom:0.2em;'>🧠 What’s the Ask?</h3>
-<ul>
-  <li>Craft a compelling prompt that answers:</li>
-</ul>
-<blockquote style='font-size:1.1em; color:#36a8f5; border-left:4px solid #36a8f5; margin:0 0 1em 0; padding:0.5em 1em;'>
-  Why should your industry group receive additional investment from our leader?
-</blockquote>
-<ul>
-  <li>Think <b>innovation</b>, <b>impact</b>, and <b>intention</b>.</li>
-</ul>
-"""
+                <h3 style='margin-bottom:0.2em;'>🧠 What’s the Ask?</h3>
+                <ul>
+                <li>Craft a compelling prompt that answers:</li>
+                </ul>
+                <blockquote style='font-size:1.1em; color:#36a8f5; border-left:4px solid #36a8f5; margin:0 0 1em 0; padding:0.5em 1em;'>
+                Why should your industry group receive additional investment from our leader?
+                </blockquote>
+                <ul>
+                <li>Think <b>innovation</b>, <b>impact</b>, and <b>intention</b>.</li>
+                </ul>
+                """
 
     homepage_content2 = """
 
-<p>Think your industry group deserves a bigger slice of the pie? Ready to make the case for why your team should get extra investment from leadership?</p>
-<p>Here’s your chance to prove it—<b>prompt-style</b>.</p>
+                <p>Think your industry group deserves a bigger slice of the pie? Ready to make the case for why your team should get extra investment from leadership?</p>
+                <p>Here’s your chance to prove it—<b>prompt-style</b>.</p>
 
-<h3>What is this?</h3>
-<ul>
-    <li>This is no ordinary pitch session. It’s a competitive, high-stakes, slightly sassy prompt showdown.</li>
-    <li>Battle it out with your fellow Partners to craft the <b>strongest business case</b> for additional funding.</li>
-</ul>
+                <h3>What is this?</h3>
+                <ul>
+                    <li>This is no ordinary pitch session. It’s a competitive, high-stakes, slightly sassy prompt showdown.</li>
+                    <li>Battle it out with your fellow Partners to craft the <b>strongest business case</b> for additional funding.</li>
+                </ul>
 
-<h3>🔄 The Format</h3>
-<ul>
-    <li><b>Three chances</b> to write your business case prompt.</li>
-    <li>After each of your first two submissions, you’ll receive <b>sassy, unfiltered feedback</b> to sharpen your thinking.</li>
-    <li>On the third round, you’ll submit your <b>final prompt</b>—the one that hits the mark.</li>
-</ul>
+                <h3>🔄 The Format</h3>
+                <ul>
+                    <li><b>Three chances</b> to write your business case prompt.</li>
+                    <li>After each of your first two submissions, you’ll receive <b>sassy, unfiltered feedback</b> to sharpen your thinking.</li>
+                    <li>On the third round, you’ll submit your <b>final prompt</b>—the one that hits the mark.</li>
+                </ul>
 
-<h3>🧠 What’s the Ask?</h3>
-<ul>
-    <li>Craft a compelling prompt that answers:</li>
-</ul>
-<blockquote style='font-size:1.1em; color:#36a8f5; border-left:4px solid #36a8f5; margin:0 0 1em 0; padding:0.5em 1em;'>
-    Why should our industry group receive additional investment from our leader?
-</blockquote>
-<ul>
-    <li>Your prompt should outline a clear, innovative, and impact-driven opportunity that will:</li>
-    <ul>
-        <li>Strengthen M&A services and relationships with key client accounts</li>
-        <li>Unlock growth potential for your industry</li>
-        <li>Position your group as a leader in delivering differentiated, future-focused M&A value</li>
-    </ul>
-</ul>
+                <h3>🧠 What’s the Ask?</h3>
+                <ul>
+                    <li>Craft a compelling prompt that answers:</li>
+                </ul>
+                <blockquote style='font-size:1.1em; color:#36a8f5; border-left:4px solid #36a8f5; margin:0 0 1em 0; padding:0.5em 1em;'>
+                    Why should our industry group receive additional investment from our leader?
+                </blockquote>
+                <ul>
+                    <li>Your prompt should outline a clear, innovative, and impact-driven opportunity that will:</li>
+                    <ul>
+                        <li>Strengthen M&A services and relationships with key client accounts</li>
+                        <li>Unlock growth potential for your industry</li>
+                        <li>Position your group as a leader in delivering differentiated, future-focused M&A value</li>
+                    </ul>
+                </ul>
 
-<h3>🏆 What Makes a Winning Prompt?</h3>
-<ul>
-    <li><b>Specific.</b> <b>Bold.</b> Grounded in reality—but aspirational.</li>
-    <li>Shows how funding will turn strategy into action.</li>
-    <li>Makes leadership sit up and say: “Now that’s something I want to back.”</li>
-</ul>
+                <h3>🏆 What Makes a Winning Prompt?</h3>
+                <ul>
+                    <li><b>Specific.</b> <b>Bold.</b> Grounded in reality—but aspirational.</li>
+                    <li>Shows how funding will turn strategy into action.</li>
+                    <li>Makes leadership sit up and say: “Now that’s something I want to back.”</li>
+                </ul>
 
-<h3>💡 Bonus Tip</h3>
-<ul>
-    <li>Have fun with it—but don’t forget the real goal: winning hearts, minds, and budgets.</li>
-</ul>
+                <h3>💡 Bonus Tip</h3>
+                <ul>
+                    <li>Have fun with it—but don’t forget the real goal: winning hearts, minds, and budgets.</li>
+                </ul>
 
-<p>Game on. Let’s see which industry brings the strongest case to the table. 🔥</p>
-<p><b>Ready… set… PROMPT!</b></p>
+                <p>Game on. Let’s see which industry brings the strongest case to the table. 🔥</p>
+                <p><b>Ready… set… PROMPT!</b></p>
 
-"""
+                """
 
     st.markdown(homepage_content2, unsafe_allow_html=True)
     get_started = """<h3>🏃‍♂️Enter a team name and let's get started!</h3><p>Enter your team name and select your industry below, then click 'Get Started' to begin.</p>"""
     st.markdown(get_started, unsafe_allow_html=True)
+
     industry_list = ["Health", "Technology", "Gas", "Finance", "Retail", "Manufacturing", "Energy"]
     team_name = st.text_input("Custom Team Name:", max_chars=30, placeholder="e.g. Team_1")
     selected_industry = st.selectbox("Select your industry:", industry_list)
@@ -245,32 +250,60 @@ if not st.session_state["main"] and not st.session_state["show_leaderboard"]:
 elif st.session_state["show_leaderboard"]:
     st.title("🏆 Competition Leaderboard")
     st.markdown("### Current standings for all teams across industries")
-
+    
     # Back button
     if st.button("← Back to Home", type="secondary"):
         st.session_state["show_leaderboard"] = False
         st.session_state["main"] = False
         st.rerun()
-
+    
     st.markdown("---")
-
+    
     # Fetch leaderboard from SQLite DB
     leaderboard = get_leaderboard()
-    leaderboard_rows = [
-        {"Team": row[0], "Best Score": row[1], "Last Submission": row[2]} for row in leaderboard
-    ]
-    df = pd.DataFrame(leaderboard_rows)
-    st.dataframe(df, use_container_width=True, height=400)
-
+    
+    if leaderboard:
+        # Use real data from database
+        leaderboard_rows = [
+            {"Team": row[0], "Score": row[1], "Last Submission": row[2], "Submissions": 1} for row in leaderboard
+        ]
+        df = pd.DataFrame(leaderboard_rows)
+    else:
+        # Fallback to demo data if no real data exists
+        df = pd.DataFrame(st.session_state["leaderboard_data"])
+        # Remove Rank column as it's not needed for display
+        if 'Rank' in df.columns:
+            df = df.drop('Rank', axis=1)
+    
+    # Create a styled dataframe
+    st.markdown("#### 📊 Team Rankings")
+    
+    # Highlight top 3 teams
+    def highlight_top_teams(row):
+        if row.name == 0:  # First place
+            return ['background-color: #FFD700; font-weight: bold'] * len(row)  # Gold
+        elif row.name == 1:  # Second place
+            return ['background-color: #C0C0C0; font-weight: bold'] * len(row)  # Silver
+        elif row.name == 2:  # Third place
+            return ['background-color: #CD7F32; font-weight: bold'] * len(row)  # Bronze
+        else:
+            return [''] * len(row)
+    
+    styled_df = df.style.apply(highlight_top_teams, axis=1)
+    st.dataframe(styled_df, use_container_width=True, height=400)
+    
     # Summary stats
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("Total Teams", len(df))
     with col2:
-        st.metric("Average Score", f"{df['Best Score'].mean():.0f}" if not df.empty else "0")
+        if "Submissions" in df.columns:
+            st.metric("Total Submissions", df["Submissions"].sum())
+        else:
+            st.metric("Total Submissions", "N/A")
     with col3:
-        st.metric("Most Recent Submission", str(df['Last Submission'].max()) if not df.empty else "-")
-
+        st.metric("Average Score", f"{df['Score'].mean():.0f}" if not df.empty else "0")
+    
     st.markdown("---")
     st.markdown("*Leaderboard updates in real-time during the competition*")
     st.markdown("Built for the seminar competition.")
@@ -286,33 +319,7 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
     st.title(f"Main Page - {st.session_state['team']}")
     st.markdown("---")
     st.markdown(case_study_content)
-    st.markdown("---")
-    
-    # # Show Case Study button at the top of main page
-    # col1, col2, col3 = st.columns([1, 2, 1])
-    # with col2:
-    #     if st.button("📚 Show Case Study", type="secondary", use_container_width=True):
-    #         st.session_state["show_case_study"] = True
-
-    # # Case Study Modal/Popup
-    # if st.session_state["show_case_study"]:
-    #     with st.container():
-    #         st.markdown("---")
-    #         col1, col2, col3 = st.columns([0.1, 0.8, 0.1])
-    #         with col2:
-    #             st.markdown(
-    #                 """
-    #                 <div style='background-color: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px solid #36a8f5; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);'>
-    #                 """,
-    #                 unsafe_allow_html=True
-    #             )
-    #             st.markdown(case_study_content)
-    #             if st.button("❌ Close Case Study", type="primary"):
-    #                 st.session_state["show_case_study"] = False
-    #                 st.rerun()
-    #             st.markdown("</div>", unsafe_allow_html=True)
-    #         st.markdown("---")
-    
+    st.markdown("---")  
     st.markdown("Enter your prompt below and submit to see the AI response.")
     st.info(f"Submissions left: {st.session_state['submissions_left']}")
     user_prompt = st.text_area("Prompt:", height=100, placeholder="Type your question or prompt here...")
@@ -396,20 +403,10 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     st.error(f"⚠️ {ai_response}")
             
             with col2:
-                st.markdown("### 📊 AI Response Evaluation")
-                st.markdown("*Quality assessment of the AI-generated response:*")
+                st.markdown("### 📊 Prompt Evaluation")
+                st.markdown("*Quality assessment of your original prompt:*")
                 
                 if evaluation:
-            # Display evaluation results in sidebar or below
-            st.markdown("---")
-            st.markdown("### 📊 Prompt Evaluation")
-            st.markdown("*Quality assessment of your original prompt:*")
-            
-            if evaluation:
-                # Create columns for evaluation display
-                col1, col2 = st.columns([1, 1])
-                
-                with col1:
                     # Overall score with color coding
                     score_color = "#28a745" if evaluation.overall_score >= 80 else "#ffc107" if evaluation.overall_score >= 60 else "#dc3545"
                     st.markdown(
@@ -425,21 +422,17 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     # Individual scores
                     st.markdown("**📋 Detailed Scores:**")
                     score_data = {
-                        "Criterion": ["Strategic Fit & Objectives", "Audience & Relationships", "Commercials & Resourcing", "Outcomes, Measurment & Activation"],
+                        "Criterion": ["Strategic Fit & Objectives", "Audience & Relationships", "Commercials & Resourcing", "Outcomes, Measurement & Activation"],
                         "Score": [f"{evaluation.clarity_score:.1f}", f"{evaluation.specificity_score:.1f}", 
                                 f"{evaluation.context_score:.1f}", f"{evaluation.structure_score:.1f}"]
                     }
                     df_scores = pd.DataFrame(score_data)
                     st.dataframe(df_scores, use_container_width=True, hide_index=True)
-                
-                with col2:
+                    
                     # Feedback
                     st.markdown("**💭 AI Feedback:**")
                     st.info(evaluation.feedback)
                     
-                    # ...removed strengths and areas for improvement boxes...
-                else:
-                    st.error("⚠️ Evaluation failed. Please try again.")
                     # Strengths and improvements in expandable sections
                     with st.expander("✅ Strengths"):
                         for strength in evaluation.strengths:
@@ -448,14 +441,29 @@ elif st.session_state["main"] and not st.session_state["show_leaderboard"]:
                     with st.expander("🔧 Areas for Improvement"):
                         for improvement in evaluation.improvements:
                             st.write(f"• {improvement}")
-            else:
-                st.error("⚠️ Evaluation failed. Please try again.")
+                else:
+                    st.error("⚠️ Evaluation failed. Please try again.")
             
             # Update leaderboard in SQLite DB with highest score for this team
             if evaluation:
                 team_name = st.session_state["team"]
                 score = evaluation.overall_score
                 update_team_score(team_name, score)
+
+            # Show original prompt for reference
+            st.markdown("---")
+            st.markdown("### 📝 Your Original Prompt")
+            with st.expander("Show submitted prompt", expanded=False):
+                st.code(user_prompt, language="text")
+            
+            # Terminal Output Section
+            st.markdown("### 🖥️ System Activity")
+            if st.session_state["terminal_output"]:
+                with st.expander("Show System Logs", expanded=False):
+                    for i, output in enumerate(reversed(st.session_state["terminal_output"][-5:]), 1):  # Show last 5 entries
+                        st.code(output, language="text")
+            else:
+                st.info("No system activity captured yet.")
     elif submit_disabled:
         st.warning("No more submissions available.")
     else:
