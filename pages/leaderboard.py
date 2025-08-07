@@ -244,8 +244,8 @@ if recent_images:
         with col2:
             st.markdown(f"""
             <div style='text-align: center; margin-bottom: 1px;'>
-                <h4 style='color: #fbbf24; 'text-align: center; margin-bottom: 0px;'> {img_data['team_name']}</h4>
-                <p style='color: #94a3b8; font-style: italic; margin-bottom: 4;'>⏰ {img_data['time_display']}</p>
+                <h4 style='color: #fbbf24; 'text-align: center; margin: 0px;'> {img_data['team_name']}</h4>
+                <p style='color: #94a3b8; text-align: center; font-style: italic; margin: 4;'>{img_data['time_display']}</p>
             </div>
             """, unsafe_allow_html=True)
         
@@ -259,7 +259,7 @@ if recent_images:
         
         # Add a small badge showing the position
         if idx == 0:
-            st.markdown(f"<div style='text-align: center; color: #ffd700; font-weight: bold;'>� Most Recent</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='text-align: center; color: #ffd700; font-weight: bold;'>Most Recent</div>", unsafe_allow_html=True)
         else:
             st.markdown(f"<div style='text-align: center; color: #94a3b8;'>#{idx + 1}</div>", unsafe_allow_html=True)
     
