@@ -55,7 +55,7 @@ if "team" not in st.session_state:
 if "main" not in st.session_state:
     st.session_state["main"] = False
 if "submissions_left" not in st.session_state:
-    st.session_state["submissions_left"] = 3
+    st.session_state["submissions_left"] = 2
 if "show_case_study" not in st.session_state:
     st.session_state["show_case_study"] = False
 if "evaluator" not in st.session_state:
