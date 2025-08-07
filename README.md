@@ -150,4 +150,4 @@ Update HTML/CSS in Streamlit markdown sections
 
 ---
 
-*Built for Deloitte Partners Conference 2025 - Demonstrating the power of GenAI in business analysis and learning.*
+*Built for Partners Conference 2025 - Demonstrating the power of GenAI in business analysis and learning.*

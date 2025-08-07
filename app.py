@@ -105,7 +105,7 @@ Structure your analysis professionally with logical sections and clear formattin
         stream = client.chat.completions.create(
             model="gpt-4.1-mini-2025-04-14",
             messages=[
-                {"role": "system", "content": "You are a senior M&A consultant providing expert analysis. Use the case study context to inform your response and provide detailed, actionable business insights. Always format your response as well-structured markdown with clear headings, bullet points, and professional formatting."},
+                {"role": "system", "content": "You are a M&A Partner providing expert analysis. Use the case study context to inform your response and provide detailed, actionable business insights. Always format your response as well-structured markdown with clear headings, bullet points, and professional formatting."},
                 {"role": "user", "content": full_context}
             ],
             temperature=0.7,

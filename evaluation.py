@@ -61,6 +61,8 @@ class PromptEvaluator:
         evaluation_prompt = f"""
 You are an expert prompt engineer and business consultant evaluating prompts for M&A and business strategy analysis.
 
+*YOU WILL EVALUATE ALL BUSINESS CASES WITH HIGH SCRUTINY AND CRITICALLY HARSH MARKING*
+
 Please evaluate the following user prompt based on these criteria:
 
 1. **Clarity (25%)**: How clear and understandable is the prompt? Is it easy to follow?
