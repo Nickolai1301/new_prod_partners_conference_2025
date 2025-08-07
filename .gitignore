@@ -1,3 +1,19 @@
 # Ignore all TOML and env files
 *.toml
+# Environments
 .env
+.envrc
+.venv/
+.venv
+env/
+venv/
+venv
+ENV/
+env.bak/
+venv.bak/
+
+# Virtual environment folders (common variations)
+*/venv/
+*/venv
+*/.venv/
+*/.venv
