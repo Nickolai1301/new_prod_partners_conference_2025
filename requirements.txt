@@ -1,6 +1,7 @@
 streamlit>=1.28.0
 openai>=1.0.0
 streamlit-authenticator
+streamlit-autorefresh
 python-dotenv==1.0.1
 numpy==2.3.2
 Pillow==11.3.0
