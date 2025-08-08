@@ -266,28 +266,28 @@ if recent_images:
 else:
     st.info("🤷‍♂️ No tweet images generated yet. Submit prompts to see Agent Lee's responses!")
 
-# Button to clear leaderboard results (admin use)
-if st.button("🗑️ Clear Leaderboard (Admin)", type="secondary"):
-    clear_leaderboard()
-    
-    # Also delete all tweet images in generated_tweets folder
-    import glob
-    tweets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "generated_tweets")
-    if os.path.exists(tweets_dir):
-        png_files = glob.glob(os.path.join(tweets_dir, "*.png"))
-        deleted_count = 0
-        for png_file in png_files:
-            try:
-                os.remove(png_file)
-                deleted_count += 1
-            except Exception as e:
-                st.warning(f"Could not delete {os.path.basename(png_file)}: {str(e)}")
-        
-        if deleted_count > 0:
-            st.success(f"Leaderboard cleared! Also deleted {deleted_count} tweet images.")
-        else:
-            st.success("Leaderboard cleared! (No tweet images found to delete)")
-    else:
-        st.success("Leaderboard cleared!")
-    
-    st.rerun()
+# Button to clear leaderboard results (admin use) - DISABLED
+# if st.button("🗑️ Clear Leaderboard (Admin)", type="secondary"):
+#     clear_leaderboard()
+#     
+#     # Also delete all tweet images in generated_tweets folder
+#     import glob
+#     tweets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "generated_tweets")
+#     if os.path.exists(tweets_dir):
+#         png_files = glob.glob(os.path.join(tweets_dir, "*.png"))
+#         deleted_count = 0
+#         for png_file in png_files:
+#             try:
+#                 os.remove(png_file)
+#                 deleted_count += 1
+#             except Exception as e:
+#                 st.warning(f"Could not delete {os.path.basename(png_file)}: {str(e)}")
+#         
+#         if deleted_count > 0:
+#             st.success(f"Leaderboard cleared! Also deleted {deleted_count} tweet images.")
+#         else:
+#             st.success("Leaderboard cleared! (No tweet images found to delete)")
+#     else:
+#         st.success("Leaderboard cleared!")
+#     
+#     st.rerun()
