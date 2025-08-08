@@ -9,6 +9,8 @@ from io import StringIO
 import contextlib
 import pandas as pd
 from db import init_db, update_team_score, get_leaderboard
+from datetime import datetime
+
 
 
 
@@ -25,24 +27,11 @@ except ImportError as e:
     def create_tweet_image(*args, **kwargs):
         return "tweet_generator_not_available.png"
 
-from datetime import datetime
 
 
 
 
 
-# Load environment variables
-# load_dotenv()
-
-# Access OpenAI API key from Streamlit secrets
-# if "OPENAI_API_KEY" in st.secrets:
-#     # Running on Streamlit Cloud or with .streamlit/secrets.toml
-#     OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
-# else:
-#     # Running locally, get from .env
-#     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-
-# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
 
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -55,7 +44,9 @@ if "team" not in st.session_state:
 if "main" not in st.session_state:
     st.session_state["main"] = False
 if "submissions_left" not in st.session_state:
-    st.session_state["submissions_left"] = 2
+    st.session_state["submissions_left"] = 999  # Unlimited submissions
+if "submission_count" not in st.session_state:
+    st.session_state["submission_count"] = 0
 if "show_case_study" not in st.session_state:
     st.session_state["show_case_study"] = False
 if "evaluator" not in st.session_state:
@@ -328,17 +319,19 @@ elif st.session_state["main"]:
     st.markdown(case_study_content)
     st.markdown("---")
     st.markdown("Enter your prompt below and submit to see the AI response.")
-    st.info(f"Submissions left: {st.session_state['submissions_left']}")
+    # Display submission counter
+    st.info(f"Submissions made: {st.session_state['submission_count']}")
     user_prompt = st.text_area(
         "Prompt:", height=100, placeholder="Type your question or prompt here..."
     )
-    submit_disabled = st.session_state["submissions_left"] == 0
+    submit_disabled = False  # Never disable submissions
     submit = st.button("Submit Prompt", type="primary", disabled=submit_disabled)
     if submit:
         if not user_prompt.strip():
             st.warning("Please enter a prompt before submitting.")
         else:
-            st.session_state["submissions_left"] -= 1
+            # Increment submission counter
+            st.session_state["submission_count"] += 1
 
             # Capture terminal output during processing
             @contextlib.contextmanager
@@ -528,8 +521,7 @@ elif st.session_state["main"]:
             with st.expander("Show submitted prompt", expanded=False):
                 st.code(user_prompt, language="text")
 
-    elif submit_disabled:
-        st.warning("No more submissions available.")
+    # Removed submission limit warnings since submissions are now unlimited
     else:
         st.info("Submit a prompt to see the AI response here.")
     st.markdown("---")
