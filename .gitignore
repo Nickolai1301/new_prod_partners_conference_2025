@@ -19,5 +19,5 @@ test_venv/
 *.venv/
 *.venv
 *cpython-313*
-
+generated_tweets/*.png
 leaderboard.db
