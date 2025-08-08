@@ -55,7 +55,9 @@ if "team" not in st.session_state:
 if "main" not in st.session_state:
     st.session_state["main"] = False
 if "submissions_left" not in st.session_state:
-    st.session_state["submissions_left"] = 2
+    st.session_state["submissions_left"] = 3
+if "submissions_made" not in st.session_state:
+    st.session_state["submissions_made"] = 0
 if "show_case_study" not in st.session_state:
     st.session_state["show_case_study"] = False
 if "evaluator" not in st.session_state:
@@ -328,17 +330,21 @@ elif st.session_state["main"]:
     st.markdown(case_study_content)
     st.markdown("---")
     st.markdown("Enter your prompt below and submit to see the AI response.")
-    st.info(f"Submissions left: {st.session_state['submissions_left']}")
+    submissions_remaining = 3 - st.session_state["submissions_made"]
+    st.info(f"Submissions left: {submissions_remaining}")
     user_prompt = st.text_area(
         "Prompt:", height=100, placeholder="Type your question or prompt here..."
     )
-    submit_disabled = st.session_state["submissions_left"] == 0
+    submit_disabled = submissions_remaining <= 0
     submit = st.button("Submit Prompt", type="primary", disabled=submit_disabled)
     if submit:
         if not user_prompt.strip():
             st.warning("Please enter a prompt before submitting.")
+        elif submissions_remaining <= 0:
+            st.error("Maximum of 3 submissions reached.")
         else:
             st.session_state["submissions_left"] -= 1
+            st.session_state["submissions_made"] += 1
 
             # Capture terminal output during processing
             @contextlib.contextmanager
@@ -398,10 +404,15 @@ elif st.session_state["main"]:
             trump_tweet = None
             if evaluation:
                 with st.spinner("🐦 Agent Lee is tweeting! ..."):
-                    trump_tweet = generate_trump_tweet(
-                        evaluation.overall_score, ai_response, st.session_state["team"]
-                    )
-                    st.session_state["last_trump_tweet"] = trump_tweet
+                    try:
+                        trump_tweet = generate_trump_tweet(
+                            evaluation.overall_score, ai_response, st.session_state["team"]
+                        )
+                        st.session_state["last_trump_tweet"] = trump_tweet
+                        st.write(f"DEBUG: Generated tweet: {trump_tweet[:50]}...")  # Debug line
+                    except Exception as e:
+                        st.error(f"Error generating tweet: {str(e)}")
+                        trump_tweet = f"Error generating tweet for {st.session_state['team']} with score {evaluation.overall_score:.1f}"
 
             # Display results
             st.success(
@@ -527,9 +538,15 @@ elif st.session_state["main"]:
             st.markdown("### 📝 Your Original Prompt")
             with st.expander("Show submitted prompt", expanded=False):
                 st.code(user_prompt, language="text")
+            
+            # Rerun to update the submissions counter
+            st.rerun()
 
     elif submit_disabled:
-        st.warning("No more submissions available.")
+        if submissions_remaining <= 0:
+            st.warning("Maximum of 3 submissions reached. No more submissions available.")
+        else:
+            st.warning("No more submissions available.")
     else:
         st.info("Submit a prompt to see the AI response here.")
     st.markdown("---")
