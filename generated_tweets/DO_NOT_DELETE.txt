@@ -1,0 +1,9 @@
+cannot be deleted, generated_tweets must contain a file to ensure it is availble for when tweets are generated
+
+
+
+
+an empty file will not be uploaded to git which will throw an error if there is no file
+
+
+error checking should be implemented which will create the folder if it does not exist
