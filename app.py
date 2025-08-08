@@ -305,7 +305,7 @@ if not st.session_state["main"]:
     get_started = """<h3>🏃‍♂️Enter a team name and let's get started!</h3><p>Enter your team name and select your industry below, then click 'Get Started' to begin.</p>"""
     st.markdown(get_started, unsafe_allow_html=True)
 
-    industry_list = ["TMT", "FSI", "Health", "Infra", "PE", "Consumer"]
+    industry_list = ["TMT", "FSI", "Health", "Infra", "PE", "Consumer", "ER&I"]
     team_name = st.text_input(
         "Custom Team Name:", max_chars=30, placeholder="e.g. Team_1"
     )
